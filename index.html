@@ -116,34 +116,56 @@
           <p class="eyebrow">Podgląd aplikacji</p>
           <h2>Zobacz klimat gry przed pobraniem</h2>
         </div>
-        <div class="gallery-grid">
-          <figure class="shot-card" style="--delay: 0ms">
-            <img
-              class="shot-image shot-image-a"
-              src="graphics/Screenshot_20260509_003251.jpg"
-              alt="Ekran startowy aplikacji 36"
-              loading="lazy"
-            />
-            <figcaption>Ekran startowy</figcaption>
-          </figure>
-          <figure class="shot-card" style="--delay: 120ms">
-            <img
-              class="shot-image shot-image-b"
-              src="graphics/Screenshot_20260509_003323.jpg"
-              alt="Widok kart pytań"
-              loading="lazy"
-            />
-            <figcaption>Tryb pytań</figcaption>
-          </figure>
-          <figure class="shot-card" style="--delay: 240ms">
-            <img
-              class="shot-image shot-image-c"
-              src="graphics/Screenshot_20260509_003342.jpg"
-              alt="Rozgrywka imprezowa"
-              loading="lazy"
-            />
-            <figcaption>Tryb imprezowy</figcaption>
-          </figure>
+        <div class="screenshots-slider" data-slider>
+          <button class="slider-arrow slider-arrow-prev" type="button" aria-label="Poprzedni screen" data-slider-prev>
+            ‹
+          </button>
+          <div class="slider-viewport">
+            <figure class="slider-card is-active shot-card" data-slide>
+              <img
+                class="slider-image"
+                src="graphics/Screenshot_20260509_003251.jpg"
+                alt="Ekran startowy aplikacji 36"
+                loading="lazy"
+              />
+              <figcaption>
+                <strong>Ekran startowy</strong>
+                <span>Szybkie wejscie do gry i czytelny wybor trybu.</span>
+              </figcaption>
+            </figure>
+            <figure class="slider-card shot-card" data-slide>
+              <img
+                class="slider-image"
+                src="graphics/Screenshot_20260509_003323.jpg"
+                alt="Widok kart pytań"
+                loading="lazy"
+              />
+              <figcaption>
+                <strong>Tryb pytań</strong>
+                <span>Spokojniejszy klimat rozmowy i budowania napiecia.</span>
+              </figcaption>
+            </figure>
+            <figure class="slider-card shot-card" data-slide>
+              <img
+                class="slider-image"
+                src="graphics/Screenshot_20260509_003342.jpg"
+                alt="Rozgrywka imprezowa"
+                loading="lazy"
+              />
+              <figcaption>
+                <strong>Tryb imprezowy</strong>
+                <span>Wieksza energia, wiecej chaosu i szybsze tempo zabawy.</span>
+              </figcaption>
+            </figure>
+          </div>
+          <button class="slider-arrow slider-arrow-next" type="button" aria-label="Nastepny screen" data-slider-next>
+            ›
+          </button>
+        </div>
+        <div class="slider-dots" aria-label="Wybierz screen">
+          <button class="slider-dot is-active" type="button" aria-label="Pokaz ekran startowy" data-slider-dot="0"></button>
+          <button class="slider-dot" type="button" aria-label="Pokaz tryb pytan" data-slider-dot="1"></button>
+          <button class="slider-dot" type="button" aria-label="Pokaz tryb imprezowy" data-slider-dot="2"></button>
         </div>
       </section>
 

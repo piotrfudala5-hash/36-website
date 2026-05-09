@@ -326,11 +326,108 @@ h1 {
   font-size: clamp(1.6rem, 2.8vw, 2.4rem);
 }
 
-.gallery-grid {
-  margin-top: 16px;
+.screenshots-slider {
+  margin-top: 18px;
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+}
+
+.slider-viewport {
+  position: relative;
+  min-height: 700px;
+}
+
+.slider-card {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+  align-items: stretch;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(24px) scale(0.98);
+  transition: opacity 260ms ease, transform 260ms ease;
+}
+
+.slider-card.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0) scale(1);
+}
+
+.slider-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 700px;
+  object-fit: cover;
+  object-position: top center;
+  background: #0d141f;
+}
+
+.slider-card figcaption {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 112, 67, 0.12), transparent 38%),
+    linear-gradient(180deg, rgba(22, 35, 54, 0.96), rgba(10, 18, 28, 0.98));
+}
+
+.slider-card figcaption strong {
+  font-family: "Bricolage Grotesque", "Segoe UI", sans-serif;
+  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+}
+
+.slider-card figcaption span {
+  color: var(--muted);
+  font-size: 1.05rem;
+  max-width: 28ch;
+}
+
+.slider-arrow {
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(13, 22, 34, 0.92);
+  color: var(--text);
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.slider-arrow:hover {
+  transform: translateY(-2px);
+  border-color: rgba(45, 224, 193, 0.45);
+  background: rgba(18, 31, 48, 0.98);
+}
+
+.slider-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.slider-dot {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(236, 247, 255, 0.25);
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.slider-dot.is-active {
+  width: 30px;
+  background: linear-gradient(120deg, #64f1d8, #2de0c1);
 }
 
 .shot-card {
@@ -353,7 +450,6 @@ h1 {
 .shot-card img {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 10;
   object-fit: cover;
   filter: saturate(1.06) contrast(1.04);
 }
@@ -361,18 +457,6 @@ h1 {
 .shot-card:hover {
   transform: translateY(-3px);
   border-color: rgba(255, 158, 106, 0.5);
-}
-
-.shot-image-a {
-  object-position: 18% 52%;
-}
-
-.shot-image-b {
-  object-position: 52% 45%;
-}
-
-.shot-image-c {
-  object-position: 84% 48%;
 }
 
 .shot-card figcaption {
@@ -465,9 +549,33 @@ h1 {
 
 @media (max-width: 940px) {
   .modes,
-  .gallery-grid,
   .stats {
     grid-template-columns: 1fr;
+  }
+
+  .screenshots-slider {
+    grid-template-columns: 1fr;
+  }
+
+  .slider-viewport {
+    min-height: 640px;
+  }
+
+  .slider-card {
+    grid-template-columns: 1fr;
+  }
+
+  .slider-image {
+    min-height: 420px;
+    max-height: 520px;
+  }
+
+  .slider-card figcaption {
+    padding: 18px;
+  }
+
+  .slider-arrow {
+    display: none;
   }
 
   .site-header {
