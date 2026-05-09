@@ -64,6 +64,7 @@ body {
 .site-header,
 .hero,
 .modes,
+.screenshots,
 .stats,
 .download,
 .site-footer {
@@ -75,7 +76,25 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   padding: 28px 0 12px;
+}
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.top-nav a {
+  text-decoration: none;
+  color: var(--muted);
+  font-weight: 600;
+  transition: color 180ms ease;
+}
+
+.top-nav a:hover {
+  color: var(--text);
 }
 
 .brand {
@@ -171,7 +190,7 @@ h1 {
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 24px;
+  margin-top: 28px;
 }
 
 .mode-card {
@@ -190,6 +209,52 @@ h1 {
 .mode-card p {
   margin: 0;
   color: var(--muted);
+}
+
+.screenshots {
+  margin-top: 28px;
+}
+
+.section-head h2 {
+  margin: 10px 0 0;
+  font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+}
+
+.gallery-grid {
+  margin-top: 16px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.shot-card {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(10, 19, 29, 0.9);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.shot-card.reveal-on {
+  animation: revealUp 640ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+.shot-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  filter: saturate(1.06) contrast(1.04);
+}
+
+.shot-card figcaption {
+  padding: 12px 14px;
+  color: var(--muted);
+  font-weight: 600;
 }
 
 .stats {
@@ -263,8 +328,13 @@ h1 {
 
 @media (max-width: 940px) {
   .modes,
+  .gallery-grid,
   .stats {
     grid-template-columns: 1fr;
+  }
+
+  .top-nav {
+    display: none;
   }
 
   .hero {

@@ -13,3 +13,4 @@ const observer = new IntersectionObserver(
 );
 
 document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+document.querySelectorAll(".shot-card").forEach((el) => observer.observe(el));

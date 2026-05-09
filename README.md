@@ -16,3 +16,16 @@ Otwórz plik `index.html` w przeglądarce.
 ## Publikacja
 
 Możesz wdrożyć stronę na dowolnym hostingu statycznym (GitHub Pages, Netlify, Vercel).
+
+### GitHub Pages (automatycznie)
+
+W repo jest gotowy workflow: `.github/workflows/deploy-pages.yml`.
+
+1. Wejdź w ustawienia repo: Settings -> Pages.
+2. W Source wybierz GitHub Actions.
+3. Każdy push na `main` automatycznie wdroży stronę.
+
+### Podmiana screenshotów
+
+Sekcja screenshotów jest w `index.html` pod `#sekcja-screenshoty`.
+Podmień wartości `src` w trzech tagach `<img>` na swoje linki do screenów.
