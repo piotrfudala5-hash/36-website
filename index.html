@@ -33,20 +33,30 @@
 
     <main>
       <section class="hero reveal">
-        <p class="eyebrow">Gra imprezowa oparta o projekt Flutter</p>
-        <h1>Rozmowy, chemia i kontrolowany chaos w jednej aplikacji.</h1>
-        <p class="lead">
-          Ten landing page reprezentuje projekt "moja_apka" i jego kluczowe tryby:
-          classic36, rozmowy oraz Karty Wariata.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#sekcja-tryby">Poznaj tryby</a>
-          <a class="btn btn-ghost" href="#sekcja-pobierz">Wersja testowa</a>
+        <div class="hero-grid">
+          <div>
+            <p class="eyebrow">Gra imprezowa oparta o projekt Flutter</p>
+            <h1>Rozmowy, chemia i kontrolowany chaos w jednej aplikacji.</h1>
+            <p class="lead">
+              Ten landing page reprezentuje projekt "moja_apka" i jego kluczowe tryby:
+              classic36, rozmowy oraz Karty Wariata.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#sekcja-tryby">Poznaj tryby</a>
+              <a class="btn btn-ghost" href="#sekcja-pobierz">Wersja testowa</a>
+            </div>
+          </div>
+          <aside class="hero-visual" aria-label="Podgląd aplikacji">
+            <img src="graphics/hero-phone.svg" alt="Stylizowany ekran aplikacji 36" loading="lazy" />
+            <div class="floating-pill">Nowa wersja 1.0.67</div>
+            <div class="floating-pill floating-pill-right">3 tryby gry</div>
+          </aside>
         </div>
       </section>
 
       <section id="sekcja-tryby" class="modes">
         <article class="mode-card reveal" style="--delay: 0ms">
+          <img class="mode-icon" src="graphics/mode-classic.svg" alt="Ikona trybu Classic 36" />
           <h2>Classic 36</h2>
           <p>
             Sekwencyjny flow pytań, który prowadzi graczy od lekkiego startu do
@@ -55,6 +65,7 @@
         </article>
 
         <article class="mode-card reveal" style="--delay: 140ms">
+          <img class="mode-icon" src="graphics/mode-talk.svg" alt="Ikona trybu Rozmowy" />
           <h2>Rozmowy</h2>
           <p>
             Alternatywne scenariusze dla par i znajomych: lżejsze, poważniejsze
@@ -63,6 +74,7 @@
         </article>
 
         <article class="mode-card reveal" style="--delay: 280ms">
+          <img class="mode-icon" src="graphics/mode-crazy.svg" alt="Ikona trybu Karty Wariata" />
           <h2>Karty Wariata</h2>
           <p>
             Dynamiczny tryb imprezowy z mutatorami, zmienną intensywnością i

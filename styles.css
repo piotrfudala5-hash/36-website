@@ -124,6 +124,51 @@ body {
   padding: 56px 0 30px;
 }
 
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 26px;
+  align-items: center;
+}
+
+.hero-visual {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 16px;
+  background: linear-gradient(170deg, rgba(21, 35, 55, 0.95), rgba(14, 26, 42, 0.9));
+  box-shadow: var(--shadow);
+}
+
+.hero-visual img {
+  display: block;
+  width: 100%;
+  border-radius: 18px;
+}
+
+.floating-pill {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #0d2234;
+  background: linear-gradient(135deg, #ff9f77, #ff7043);
+  border-radius: 999px;
+  padding: 8px 12px;
+  box-shadow: 0 8px 20px rgba(255, 112, 67, 0.25);
+}
+
+.floating-pill-right {
+  left: auto;
+  right: 14px;
+  top: auto;
+  bottom: 14px;
+  color: #0f2b2a;
+  background: linear-gradient(135deg, #64f1d8, #2de0c1);
+  box-shadow: 0 8px 20px rgba(45, 224, 193, 0.25);
+}
+
 .eyebrow {
   margin: 0;
   color: var(--accent-2);
@@ -204,6 +249,13 @@ h1 {
 .mode-card h2 {
   margin: 0 0 10px;
   font-size: 1.55rem;
+}
+
+.mode-icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 14px;
+  border-radius: 14px;
 }
 
 .mode-card p {
@@ -330,6 +382,10 @@ h1 {
   .modes,
   .gallery-grid,
   .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-grid {
     grid-template-columns: 1fr;
   }
 
