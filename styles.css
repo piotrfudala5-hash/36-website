@@ -244,6 +244,13 @@ h1 {
   background: rgba(255, 255, 255, 0.02);
 }
 
+.btn-store {
+  color: #061625;
+  border-color: transparent;
+  background: linear-gradient(120deg, #64f1d8, #2de0c1);
+  box-shadow: 0 10px 24px rgba(45, 224, 193, 0.24);
+}
+
 .modes {
   display: grid;
   gap: 16px;
@@ -373,6 +380,12 @@ h1 {
 .download p {
   color: var(--muted);
   max-width: 68ch;
+}
+
+.download-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .site-footer {
