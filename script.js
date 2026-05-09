@@ -2,46 +2,31 @@ const observer = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        entry.target.classList.add("reveal-on");
+        entry.target.classList.add("is-visible");
         observer.unobserve(entry.target);
       }
     });
   },
-  {
-    threshold: 0.15,
-  }
+  { threshold: 0.14 }
 );
 
-document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
-document.querySelectorAll(".shot-card").forEach((el) => observer.observe(el));
+document.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
 
-const slider = document.querySelector("[data-slider]");
+const gallery = document.querySelector("[data-gallery]");
 
-if (slider) {
-  const slides = Array.from(slider.querySelectorAll("[data-slide]"));
-  const dots = Array.from(document.querySelectorAll("[data-slider-dot]"));
-  const prevButton = slider.querySelector("[data-slider-prev]");
-  const nextButton = slider.querySelector("[data-slider-next]");
-  let activeIndex = 0;
+if (gallery) {
+  const stageImage = gallery.querySelector("[data-gallery-stage]");
+  const stageCaption = gallery.querySelector("[data-gallery-caption]");
+  const thumbs = Array.from(gallery.querySelectorAll(".gallery-thumb"));
 
-  const renderSlide = (index) => {
-    activeIndex = (index + slides.length) % slides.length;
-
-    slides.forEach((slide, slideIndex) => {
-      slide.classList.toggle("is-active", slideIndex === activeIndex);
-    });
-
-    dots.forEach((dot, dotIndex) => {
-      dot.classList.toggle("is-active", dotIndex === activeIndex);
-    });
+  const activateThumb = (thumb) => {
+    thumbs.forEach((item) => item.classList.toggle("is-active", item === thumb));
+    stageImage.src = thumb.dataset.image;
+    stageImage.alt = thumb.dataset.alt;
+    stageCaption.textContent = thumb.dataset.caption;
   };
 
-  prevButton?.addEventListener("click", () => renderSlide(activeIndex - 1));
-  nextButton?.addEventListener("click", () => renderSlide(activeIndex + 1));
-
-  dots.forEach((dot, dotIndex) => {
-    dot.addEventListener("click", () => renderSlide(dotIndex));
+  thumbs.forEach((thumb) => {
+    thumb.addEventListener("click", () => activateThumb(thumb));
   });
-
-  renderSlide(0);
 }

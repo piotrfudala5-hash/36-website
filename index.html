@@ -3,15 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>36 Website | Gra Imprezowa</title>
+    <title>36 pytań | Rozmowy, emocje i Karty Wariata</title>
     <meta
       name="description"
-      content="36 Website - gra imprezowa z pytaniami, rozmowami i trybem Karty Wariata."
+      content="36 pytań to aplikacja na Androida z trybami dla par, rozmów i imprez. Od spokojnych pytań po Karty Wariata dla 3-8 osób."
     />
+    <meta
+      name="keywords"
+      content="36 pytań, aplikacja dla par, gra imprezowa, pytania do rozmowy, karty wariata, android"
+    />
+    <meta property="og:title" content="36 pytań | Rozmowy, emocje i Karty Wariata" />
+    <meta
+      property="og:description"
+      content="Jedna aplikacja na spokojny wieczór we dwoje i głośną noc ze znajomymi."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="graphics/banner-google-app.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Bricolage+Grotesque:wght@600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@500;700&display=swap"
       rel="stylesheet"
     />
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
@@ -19,192 +30,354 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="bg-noise" aria-hidden="true"></div>
-    <div class="orb orb-left" aria-hidden="true"></div>
-    <div class="orb orb-right" aria-hidden="true"></div>
-
-    <header class="site-header reveal">
-      <p class="brand">36 Website</p>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="36 pytań - strona główna">
+        <span class="brand-mark">36</span>
+        <span class="brand-text">pytań</span>
+      </a>
       <nav class="top-nav" aria-label="Nawigacja główna">
-        <a href="#sekcja-tryby">Tryby</a>
-        <a href="#sekcja-screenshoty">Screenshoty</a>
-        <a href="#sekcja-pobierz">Pobierz</a>
+        <a href="#o-apce">O apce</a>
+        <a href="#tryby">Tryby</a>
+        <a href="#karty-wariata">Karty Wariata</a>
+        <a href="#ekrany">Ekrany</a>
       </nav>
       <a
-        class="cta-small"
+        class="header-store"
         href="https://play.google.com/store/apps/details?id=com.stopni36.app"
         target="_blank"
         rel="noopener noreferrer"
-        >Google Play</a
+        >Pobierz</a
       >
     </header>
 
-    <main class="site-main">
-      <section class="hero reveal">
-        <div class="hero-grid">
-          <div>
-            <p class="eyebrow">Gra imprezowa na Androida</p>
-            <h1>Rozmowy, chemia i kontrolowany chaos w jednej aplikacji.</h1>
-            <p class="lead">
-              Odkryj trzy tryby zabawy: Classic 36, Rozmowy oraz Karty Wariata.
-              Idealnie na wieczor ze znajomymi lub we dwoje.
+    <main id="top">
+      <section class="hero">
+        <div class="hero-backdrop">
+          <img
+            src="graphics/banner-google-app.png"
+            alt="Grupa znajomych grających razem w karty przy stole"
+            loading="eager"
+          />
+        </div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-copy reveal">
+            <p class="eyebrow">Aplikacja na Androida</p>
+            <h1>Jedna apka na rozmowy, chemię i totalny chaos.</h1>
+            <p class="hero-lead">
+              36 pytań łączy spokojne tryby dla par i dynamiczną grę imprezową.
+              Zaczynacie od klimatu, a aplikacja prowadzi resztę.
             </p>
             <div class="hero-actions">
-              <a class="btn btn-primary" href="#sekcja-tryby">Poznaj tryby</a>
               <a
-                class="btn btn-store"
+                class="btn btn-primary"
                 href="https://play.google.com/store/apps/details?id=com.stopni36.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                >Pobierz z Google Play</a
+                >Google Play</a
               >
+              <a class="btn btn-secondary" href="#tryby">Zobacz tryby</a>
             </div>
-            <ul class="hero-highlights" aria-label="Najwazniejsze cechy">
-              <li>Po polsku</li>
+            <ul class="hero-points" aria-label="Najważniejsze atuty aplikacji">
               <li>Dla par i ekip</li>
-              <li>Gotowe scenariusze</li>
+              <li>Polski interfejs</li>
+              <li>Gotowe flow bez tłumaczenia zasad</li>
             </ul>
           </div>
-          <aside class="hero-visual" aria-label="Podgląd aplikacji">
-            <img
-              class="hero-visual-banner"
-              src="graphics/banner-google-app.png"
-              alt="Grupa znajomych grajaca razem przy stole"
-              loading="eager"
-            />
-            <div class="floating-pill">Zagraj dzisiaj</div>
-            <div class="floating-pill floating-pill-right">3 tryby gry</div>
-          </aside>
-        </div>
-      </section>
 
-      <section id="sekcja-tryby" class="modes">
-        <div class="section-head reveal">
-          <p class="eyebrow">Tryby gry</p>
-          <h2>Wybierz klimat, na jaki masz ochote</h2>
-        </div>
-        <article class="mode-card reveal" style="--delay: 0ms">
-          <img class="mode-icon" src="graphics/mode-classic.svg" alt="Ikona trybu Classic 36" />
-          <h2>Classic 36</h2>
-          <p>
-            Sekwencyjny flow pytań, który prowadzi graczy od lekkiego startu do
-            głębszej rozmowy.
-          </p>
-        </article>
-
-        <article class="mode-card reveal" style="--delay: 140ms">
-          <img class="mode-icon" src="graphics/mode-talk.svg" alt="Ikona trybu Rozmowy" />
-          <h2>Rozmowy</h2>
-          <p>
-            Alternatywne scenariusze dla par i znajomych: lżejsze, poważniejsze
-            lub tematyczne zestawy pytań.
-          </p>
-        </article>
-
-        <article class="mode-card reveal" style="--delay: 280ms">
-          <img class="mode-icon" src="graphics/mode-crazy.svg" alt="Ikona trybu Karty Wariata" />
-          <h2>Karty Wariata</h2>
-          <p>
-            Dynamiczny tryb imprezowy z mutatorami, zmienną intensywnością i
-            mechaniką utrzymującą tempo rozgrywki.
-          </p>
-        </article>
-      </section>
-
-      <section id="sekcja-screenshoty" class="screenshots reveal">
-        <div class="section-head">
-          <p class="eyebrow">Podgląd aplikacji</p>
-          <h2>Zobacz klimat gry przed pobraniem</h2>
-        </div>
-        <div class="screenshots-slider" data-slider>
-          <button class="slider-arrow slider-arrow-prev" type="button" aria-label="Poprzedni screen" data-slider-prev>
-            ‹
-          </button>
-          <div class="slider-viewport">
-            <figure class="slider-card is-active shot-card" data-slide>
+          <div class="hero-showcase reveal">
+            <div class="showcase-main">
               <img
-                class="slider-image"
                 src="graphics/Screenshot_20260509_003251.jpg"
-                alt="Ekran startowy aplikacji 36"
-                loading="lazy"
+                alt="Ekran główny aplikacji z listą trybów"
+                loading="eager"
               />
-              <figcaption>
-                <strong>Ekran startowy</strong>
-                <span>Szybkie wejscie do gry i czytelny wybor trybu.</span>
-              </figcaption>
-            </figure>
-            <figure class="slider-card shot-card" data-slide>
+            </div>
+            <div class="showcase-stack">
               <img
-                class="slider-image"
                 src="graphics/Screenshot_20260509_003323.jpg"
-                alt="Widok kart pytań"
+                alt="Ekran z klasycznymi trybami rozmowy"
                 loading="lazy"
               />
-              <figcaption>
-                <strong>Tryb pytań</strong>
-                <span>Spokojniejszy klimat rozmowy i budowania napiecia.</span>
-              </figcaption>
-            </figure>
-            <figure class="slider-card shot-card" data-slide>
               <img
-                class="slider-image"
-                src="graphics/Screenshot_20260509_003342.jpg"
-                alt="Rozgrywka imprezowa"
+                src="graphics/Screenshot_20260509_003358.jpg"
+                alt="Ekran trybu rozmów dla dwojga"
                 loading="lazy"
               />
-              <figcaption>
-                <strong>Tryb imprezowy</strong>
-                <span>Wieksza energia, wiecej chaosu i szybsze tempo zabawy.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="o-apce" class="section section-intro">
+        <div class="section-shell">
+          <div class="section-heading reveal">
+            <p class="eyebrow">O apce</p>
+            <h2>Od spokojnego wieczoru po pełnoprawny tryb imprezowy</h2>
+          </div>
+          <div class="intro-grid">
+            <article class="intro-card reveal">
+              <span class="intro-kicker">We dwoje</span>
+              <h3>Rozmowy, chemia i pytania, które naturalnie prowadzą dalej.</h3>
+              <p>
+                Aplikacja nie wrzuca was od razu na głęboką wodę. Buduje tempo,
+                zmienia nastrój i pomaga wejść w rozmowę bez sztuczności.
+              </p>
+            </article>
+            <article class="intro-card reveal">
+              <span class="intro-kicker">W grupie</span>
+              <h3>Karty Wariata to szybka, pass-and-play imprezówka dla 3-8 osób.</h3>
+              <p>
+                Jest setup graczy, chaos meter, wybór klimatu, autozapis sesji i
+                tempo, które trzyma energię przez cały wieczór.
+              </p>
+            </article>
+            <article class="intro-card reveal">
+              <span class="intro-kicker">Na start</span>
+              <h3>Jedna aplikacja, kilka nastrojów, zero tłumaczenia zasad.</h3>
+              <p>
+                Wybieracie tryb, podajecie telefon dalej i po chwili już trwa gra
+                albo rozmowa. Interfejs robi robotę za was.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="tryby" class="section section-modes">
+        <div class="section-shell">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Tryby</p>
+            <h2>Każdy ekran ma inny klimat, ale ten sam cel: ruszyć wieczór</h2>
+          </div>
+          <div class="modes-grid">
+            <article class="mode-card reveal">
+              <img src="graphics/mode-classic.svg" alt="" aria-hidden="true" />
+              <div>
+                <p class="mode-group">Klasyka</p>
+                <h3>36 pytań</h3>
+                <p>Sprawdzona ścieżka od lekkiego otwarcia do głębszej rozmowy.</p>
+              </div>
+            </article>
+            <article class="mode-card reveal">
+              <img src="graphics/mode-talk.svg" alt="" aria-hidden="true" />
+              <div>
+                <p class="mode-group">Relacje</p>
+                <h3>Rozmowy i emocje</h3>
+                <p>Lżejsze i poważniejsze scenariusze, kiedy chcecie naprawdę pogadać.</p>
+              </div>
+            </article>
+            <article class="mode-card reveal">
+              <img src="graphics/mode-talk.svg" alt="" aria-hidden="true" />
+              <div>
+                <p class="mode-group">Napięcie</p>
+                <h3>Chemia</h3>
+                <p>Tryb nastawiony na iskrę, napięcie i trochę odważniejsze tempo.</p>
+              </div>
+            </article>
+            <article class="mode-card reveal">
+              <img src="graphics/mode-talk.svg" alt="" aria-hidden="true" />
+              <div>
+                <p class="mode-group">Po czasie</p>
+                <h3>Po latach</h3>
+                <p>Format dla osób, które chcą odkryć się na nowo i wrócić do pytań.</p>
+              </div>
+            </article>
+            <article class="mode-card reveal">
+              <img src="graphics/mode-talk.svg" alt="" aria-hidden="true" />
+              <div>
+                <p class="mode-group">Solo</p>
+                <h3>Obudź się</h3>
+                <p>Spokojniejszy moduł do zatrzymania się, refleksji i zmiany nastroju.</p>
+              </div>
+            </article>
+            <article class="mode-card reveal">
+              <img src="graphics/mode-crazy.svg" alt="" aria-hidden="true" />
+              <div>
+                <p class="mode-group">Impreza</p>
+                <h3>Karty Wariata</h3>
+                <p>Najmocniejszy tryb w apce: szybkie rundy, wybory, reveal i chaos meter.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="karty-wariata" class="section section-feature">
+        <div class="section-shell feature-layout">
+          <div class="feature-copy reveal">
+            <p class="eyebrow">Nowy MVP</p>
+            <h2>Karty Wariata wyglądają jak osobna gra w środku aplikacji.</h2>
+            <p>
+              To nie jest tylko zestaw pytań. Tryb ma własny setup, prowadzenie rund,
+              chaos curve, vibe preset, hand size, wyniki, ranking i autozapis sesji.
+            </p>
+            <div class="feature-stats" aria-label="Najważniejsze cechy trybu Karty Wariata">
+              <div>
+                <strong>3-8</strong>
+                <span>graczy</span>
+              </div>
+              <div>
+                <strong>30-60 min</strong>
+                <span>na sesję</span>
+              </div>
+              <div>
+                <strong>Pass-and-play</strong>
+                <span>na jednym telefonie</span>
+              </div>
+            </div>
+            <ul class="feature-list">
+              <li>setup graczy, długości gry i klimatu</li>
+              <li>prowadzenie rund z krótkim briefingiem</li>
+              <li>płynny reveal kart i szybkie ogłaszanie wyniku</li>
+              <li>wzrost intensywności przez chaos meter</li>
+            </ul>
+          </div>
+          <div class="feature-visual reveal">
+            <img
+              src="graphics/Screenshot_20260509_003426.jpg"
+              alt="Ekran aplikacji z trybem imprezowym Karty Wariata"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-flow">
+        <div class="section-shell">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Jak to działa</p>
+            <h2>Wchodzicie, wybieracie nastrój i aplikacja prowadzi wieczór dalej</h2>
+          </div>
+          <div class="flow-grid">
+            <article class="flow-step reveal">
+              <span>01</span>
+              <h3>Wybierz tryb</h3>
+              <p>Rozmowa, chemia, klasyka albo impreza. Start zajmuje chwilę.</p>
+            </article>
+            <article class="flow-step reveal">
+              <span>02</span>
+              <h3>Dopasuj tempo</h3>
+              <p>W trybie grupowym ustawiasz graczy, długość sesji i poziom energii.</p>
+            </article>
+            <article class="flow-step reveal">
+              <span>03</span>
+              <h3>Graj bez zgrzytów</h3>
+              <p>Interfejs, autozapis i rytm ekranów ograniczają przestoje do minimum.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="ekrany" class="section section-gallery">
+        <div class="section-shell">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Ekrany aplikacji</p>
+            <h2>Prawdziwe widoki z apki, nie makiety</h2>
+          </div>
+          <div class="gallery-shell reveal" data-gallery>
+            <figure class="gallery-stage">
+              <img
+                class="gallery-stage-image"
+                src="graphics/Screenshot_20260509_003251.jpg"
+                alt="Ekran startowy aplikacji"
+                data-gallery-stage
+              />
+              <figcaption data-gallery-caption>
+                Ekran główny z podziałem na spokojniejsze tryby i sekcję grupową.
               </figcaption>
             </figure>
+            <div class="gallery-thumbs" role="tablist" aria-label="Wybór ekranów aplikacji">
+              <button
+                class="gallery-thumb is-active"
+                type="button"
+                data-image="graphics/Screenshot_20260509_003251.jpg"
+                data-caption="Ekran główny z podziałem na spokojniejsze tryby i sekcję grupową."
+                data-alt="Ekran startowy aplikacji"
+              >
+                <img src="graphics/Screenshot_20260509_003251.jpg" alt="" aria-hidden="true" />
+              </button>
+              <button
+                class="gallery-thumb"
+                type="button"
+                data-image="graphics/Screenshot_20260509_003323.jpg"
+                data-caption="Klasyczne tryby rozmowy z miękkim, czytelnym układem i dużą typografią."
+                data-alt="Widok klasycznych trybów rozmowy"
+              >
+                <img src="graphics/Screenshot_20260509_003323.jpg" alt="" aria-hidden="true" />
+              </button>
+              <button
+                class="gallery-thumb"
+                type="button"
+                data-image="graphics/Screenshot_20260509_003347.jpg"
+                data-caption="Tryb grupowy z mocniejszym charakterem wizualnym i wyraźnym kierunkiem zabawy."
+                data-alt="Ekran grupowego trybu imprezowego"
+              >
+                <img src="graphics/Screenshot_20260509_003347.jpg" alt="" aria-hidden="true" />
+              </button>
+              <button
+                class="gallery-thumb"
+                type="button"
+                data-image="graphics/Screenshot_20260509_003354.jpg"
+                data-caption="Rozmowy dla dwojga z ciepłym klimatem i bardziej romantycznym tonem."
+                data-alt="Ekran rozmów dla dwojga"
+              >
+                <img src="graphics/Screenshot_20260509_003354.jpg" alt="" aria-hidden="true" />
+              </button>
+              <button
+                class="gallery-thumb"
+                type="button"
+                data-image="graphics/Screenshot_20260509_003358.jpg"
+                data-caption="Dalsze widoki trybów relacyjnych z czytelnymi blokami i dużymi punktami wejścia."
+                data-alt="Ekran alternatywnych trybów relacyjnych"
+              >
+                <img src="graphics/Screenshot_20260509_003358.jpg" alt="" aria-hidden="true" />
+              </button>
+              <button
+                class="gallery-thumb"
+                type="button"
+                data-image="graphics/Screenshot_20260509_003426.jpg"
+                data-caption="Sekcja imprezowa pokazująca najbardziej energetyczny obszar aplikacji."
+                data-alt="Ekran imprezowego obszaru aplikacji"
+              >
+                <img src="graphics/Screenshot_20260509_003426.jpg" alt="" aria-hidden="true" />
+              </button>
+            </div>
           </div>
-          <button class="slider-arrow slider-arrow-next" type="button" aria-label="Nastepny screen" data-slider-next>
-            ›
-          </button>
-        </div>
-        <div class="slider-dots" aria-label="Wybierz screen">
-          <button class="slider-dot is-active" type="button" aria-label="Pokaz ekran startowy" data-slider-dot="0"></button>
-          <button class="slider-dot" type="button" aria-label="Pokaz tryb pytan" data-slider-dot="1"></button>
-          <button class="slider-dot" type="button" aria-label="Pokaz tryb imprezowy" data-slider-dot="2"></button>
         </div>
       </section>
 
-      <section class="stats reveal">
-        <div class="stat-card">
-          <p class="stat-number">3</p>
-          <p class="stat-label">główne style gry</p>
-        </div>
-        <div class="stat-card">
-          <p class="stat-number">1</p>
-          <p class="stat-label">aplikacja mobilna</p>
-        </div>
-        <div class="stat-card">
-          <p class="stat-number">∞</p>
-          <p class="stat-label">potencjał na wieczór</p>
-        </div>
-      </section>
-
-      <section id="sekcja-pobierz" class="download reveal">
-        <h2>Pobierz aplikacje</h2>
-        <p>
-          Najwygodniej pobierzesz aplikacje bezposrednio z oficjalnej strony Google Play.
-        </p>
-        <div class="download-actions">
-          <a
-            class="btn btn-store"
-            href="https://play.google.com/store/apps/details?id=com.stopni36.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            >Otworz w Google Play</a
-          >
-          <a class="btn btn-ghost" href="#sekcja-screenshoty">Zobacz screenshoty</a>
+      <section class="section section-cta">
+        <div class="section-shell cta-band reveal">
+          <div>
+            <p class="eyebrow">Gotowe na wieczór</p>
+            <h2>36 pytań jest już przygotowane na spokojny wieczór i głośny playtest.</h2>
+          </div>
+          <div class="cta-actions">
+            <a
+              class="btn btn-primary"
+              href="https://play.google.com/store/apps/details?id=com.stopni36.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Pobierz z Google Play</a
+            >
+            <a class="btn btn-secondary" href="#ekrany">Obejrzyj ekrany</a>
+          </div>
         </div>
       </section>
     </main>
 
-    <footer class="site-footer reveal">
-      <p>36 Website • 2026</p>
-      <p>Pytania, emocje i dobra zabawa</p>
+    <footer class="site-footer">
+      <div class="footer-shell">
+        <div>
+          <p class="footer-brand">36 pytań</p>
+          <p class="footer-copy">Rozmowy, emocje, chemia i imprezowy chaos w jednej aplikacji.</p>
+        </div>
+        <div class="footer-meta">
+          <p>Android app</p>
+          <p>2026</p>
+        </div>
+      </div>
     </footer>
 
     <script src="script.js"></script>
