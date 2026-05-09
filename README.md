@@ -29,3 +29,11 @@ W repo jest gotowy workflow: `.github/workflows/deploy-pages.yml`.
 
 Sekcja screenshotów jest w `index.html` pod `#sekcja-screenshoty`.
 Podmień wartości `src` w trzech tagach `<img>` na swoje linki do screenów.
+
+### Baner hero (Google App)
+
+Aby aktywować baner w sekcji hero, dodaj plik:
+
+- `graphics/banner-google-app.webp`
+
+Layout ma fallback, ale po dodaniu pliku baner pojawi sie automatycznie.

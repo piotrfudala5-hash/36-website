@@ -146,6 +146,18 @@ body {
   border-radius: 18px;
 }
 
+.hero-visual-banner {
+  width: 100%;
+  min-height: 420px;
+  border-radius: 18px;
+  background-image:
+    linear-gradient(180deg, rgba(10, 17, 27, 0.2), rgba(10, 17, 27, 0.7)),
+    url("graphics/banner-google-app.webp");
+  background-size: cover;
+  background-position: center;
+  box-shadow: inset 0 0 0 1px rgba(236, 247, 255, 0.12);
+}
+
 .floating-pill {
   position: absolute;
   left: 14px;
@@ -387,6 +399,10 @@ h1 {
 
   .hero-grid {
     grid-template-columns: 1fr;
+  }
+
+  .hero-visual-banner {
+    min-height: 300px;
   }
 
   .top-nav {
