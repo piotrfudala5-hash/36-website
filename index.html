@@ -3,356 +3,821 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>36 pytań | Rozmowy, emocje i Karty Wariata</title>
+    <title>36 pytań | Aplikacja do rozmów, relacji i imprez</title>
     <meta
       name="description"
-      content="36 pytań to aplikacja na Androida z trybami dla par, rozmów i imprez. Od spokojnych pytań po Karty Wariata dla 3-8 osób."
+      content="36 pytań to aplikacja na Androida do rozmów dla par, budowania chemii i imprezowego trybu Karty Wariata. Jedna apka na spokojny wieczór i głośną noc ze znajomymi."
     />
     <meta
       name="keywords"
-      content="36 pytań, aplikacja dla par, gra imprezowa, pytania do rozmowy, karty wariata, android"
+      content="36 pytań, aplikacja dla par, pytania do rozmowy, chemia, karty wariata, gra imprezowa, android"
     />
-    <meta property="og:title" content="36 pytań | Rozmowy, emocje i Karty Wariata" />
+    <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content="#121c2f" />
+    <meta property="og:locale" content="pl_PL" />
+    <meta
+      property="og:title"
+      content="36 pytań | Aplikacja do rozmów, relacji i imprez"
+    />
     <meta
       property="og:description"
-      content="Jedna aplikacja na spokojny wieczór we dwoje i głośną noc ze znajomymi."
+      content="Od spokojnej rozmowy we dwoje po szybki, imprezowy chaos przy jednym telefonie."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="graphics/banner-google-app.png" />
+    <meta property="og:url" content="https://36app.pl/" />
+    <meta
+      property="og:image"
+      content="https://36app.pl/graphics/banner-google-app.png"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="36 pytań | Aplikacja do rozmów, relacji i imprez"
+    />
+    <meta
+      name="twitter:description"
+      content="Tryby dla par, budowanie chemii i Karty Wariata dla 3-8 osób. Jedna aplikacja na różne energie wieczoru."
+    />
+    <meta
+      name="twitter:image"
+      content="https://36app.pl/graphics/banner-google-app.png"
+    />
+    <link rel="canonical" href="https://36app.pl/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="shortcut icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Przejdź do treści</a>
+
     <header class="site-header">
       <a class="brand" href="#top" aria-label="36 pytań - strona główna">
         <span class="brand-mark">36</span>
         <span class="brand-text">pytań</span>
       </a>
-      <nav class="top-nav" aria-label="Nawigacja główna">
+
+      <nav id="site-nav" class="top-nav" aria-label="Nawigacja główna">
         <a href="#o-apce">O apce</a>
         <a href="#tryby">Tryby</a>
         <a href="#karty-wariata">Karty Wariata</a>
         <a href="#ekrany">Ekrany</a>
       </nav>
+
       <a
         class="header-store"
         href="https://play.google.com/store/apps/details?id=com.stopni36.app"
         target="_blank"
         rel="noopener noreferrer"
-        >Pobierz</a
+        >Google Play</a
       >
+
+      <button
+        class="nav-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="site-nav"
+        aria-label="Otwórz menu"
+        data-nav-toggle
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </header>
 
-    <main id="top">
-      <section class="hero">
+    <main id="main-content">
+      <section id="top" class="hero" aria-labelledby="hero-title">
         <div class="hero-backdrop">
           <img
             src="graphics/banner-google-app.png"
             alt="Grupa znajomych grających razem w karty przy stole"
+            width="1774"
+            height="887"
             loading="eager"
+            fetchpriority="high"
+            decoding="async"
           />
         </div>
         <div class="hero-overlay"></div>
+        <div class="hero-orb hero-orb--amber" aria-hidden="true"></div>
+        <div class="hero-orb hero-orb--violet" aria-hidden="true"></div>
+
         <div class="hero-content">
-          <div class="hero-copy reveal">
+          <div class="hero-copy reveal is-visible">
             <p class="eyebrow">Aplikacja na Androida</p>
-            <h1>Jedna apka na rozmowy, chemię i totalny chaos.</h1>
+            <h1 id="hero-title">
+              Jedna apka na rozmowy, chemię i totalny chaos.
+            </h1>
             <p class="hero-lead">
-              36 pytań łączy spokojne tryby dla par i dynamiczną grę imprezową.
-              Zaczynacie od klimatu, a aplikacja prowadzi resztę.
+              36 pytań łączy spokojne tryby dla par z dynamiczną grą imprezową
+              na jednym telefonie. Wybieracie nastrój, a aplikacja prowadzi
+              resztę.
             </p>
+
             <div class="hero-actions">
               <a
                 class="btn btn-primary"
                 href="https://play.google.com/store/apps/details?id=com.stopni36.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                >Google Play</a
+                >Pobierz z Google Play</a
               >
-              <a class="btn btn-secondary" href="#tryby">Zobacz tryby</a>
+              <a class="btn btn-secondary" href="#tryby">Poznaj tryby</a>
             </div>
-            <ul class="hero-points" aria-label="Najważniejsze atuty aplikacji">
-              <li>Dla par i ekip</li>
-              <li>Polski interfejs</li>
-              <li>Gotowe flow bez tłumaczenia zasad</li>
+
+            <ul class="hero-points">
+              <li>7 różnych nastrojów</li>
+              <li>3-8 osób w trybie grupowym</li>
+              <li>Polski interfejs bez tłumaczenia zasad</li>
             </ul>
+
+            <div class="hero-mode-rail">
+              <article class="hero-mode-pill hero-mode-pill--rose">
+                <span>We dwoje</span>
+                <strong>Rozmowy i emocje</strong>
+              </article>
+              <article class="hero-mode-pill hero-mode-pill--amber">
+                <span>Napięcie</span>
+                <strong>Chemia</strong>
+              </article>
+              <article class="hero-mode-pill hero-mode-pill--mint">
+                <span>W grupie</span>
+                <strong>Karty Wariata</strong>
+              </article>
+            </div>
           </div>
 
-          <div class="hero-showcase reveal">
-            <div class="showcase-main">
+          <div class="hero-showcase reveal is-visible">
+            <figure class="showcase-main">
               <img
                 src="graphics/Screenshot_20260509_003251.jpg"
-                alt="Ekran główny aplikacji z listą trybów"
+                alt="Ekran główny aplikacji z wyborem nastroju i trybów"
+                width="1080"
+                height="2097"
                 loading="eager"
+                decoding="async"
               />
-            </div>
+              <figcaption>
+                <span class="showcase-label">Start</span>
+                <strong>Wybór klimatu bez zbędnego tłumaczenia</strong>
+                <p>Solo, duet i grupa są rozdzielone od pierwszego ekranu.</p>
+              </figcaption>
+            </figure>
+
             <div class="showcase-stack">
-              <img
-                src="graphics/Screenshot_20260509_003323.jpg"
-                alt="Ekran z klasycznymi trybami rozmowy"
-                loading="lazy"
-              />
-              <img
-                src="graphics/Screenshot_20260509_003358.jpg"
-                alt="Ekran trybu rozmów dla dwojga"
-                loading="lazy"
-              />
+              <figure class="showcase-card">
+                <img
+                  src="graphics/Screenshot_20260509_003347.jpg"
+                  alt="Onboarding trybu rozmów pokazujący lekkie wejście w głębszy dialog"
+                  width="1080"
+                  height="2092"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <figcaption>Rozmowy i emocje</figcaption>
+              </figure>
+
+              <figure class="showcase-card">
+                <img
+                  src="graphics/Screenshot_20260509_003323.jpg"
+                  alt="Ekran zasad trybu Karty Wariata"
+                  width="1080"
+                  height="2091"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <figcaption>Karty Wariata</figcaption>
+              </figure>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="o-apce" class="section section-intro">
+      <section
+        id="o-apce"
+        class="section section-intro"
+        aria-labelledby="intro-title"
+      >
         <div class="section-shell">
           <div class="section-heading reveal">
             <p class="eyebrow">O apce</p>
-            <h2>Od spokojnego wieczoru po pełnoprawny tryb imprezowy</h2>
+            <h2 id="intro-title">
+              Od spokojnego wieczoru po pełnoprawny tryb imprezowy
+            </h2>
+            <p class="section-lead">
+              Ta sama aplikacja potrafi wejść w kilka energii: wyciszyć,
+              rozkręcić rozmowę, podbić napięcie albo przejąć prowadzenie nad
+              grupową grą.
+            </p>
           </div>
+
           <div class="intro-grid">
             <article class="intro-card reveal">
               <span class="intro-kicker">We dwoje</span>
-              <h3>Rozmowy, chemia i pytania, które naturalnie prowadzą dalej.</h3>
+              <h3>
+                Rozmowy, chemia i pytania, które naturalnie prowadzą dalej.
+              </h3>
               <p>
                 Aplikacja nie wrzuca was od razu na głęboką wodę. Buduje tempo,
                 zmienia nastrój i pomaga wejść w rozmowę bez sztuczności.
               </p>
             </article>
+
             <article class="intro-card reveal">
               <span class="intro-kicker">W grupie</span>
-              <h3>Karty Wariata to szybka, pass-and-play imprezówka dla 3-8 osób.</h3>
+              <h3>
+                Karty Wariata to szybka imprezówka typu pass-and-play dla 3-8
+                osób.
+              </h3>
               <p>
-                Jest setup graczy, chaos meter, wybór klimatu, autozapis sesji i
-                tempo, które trzyma energię przez cały wieczór.
+                Jest setup graczy, dobór klimatu, autozapis sesji i tempo, które
+                trzyma energię przez cały wieczór.
               </p>
             </article>
+
             <article class="intro-card reveal">
               <span class="intro-kicker">Na start</span>
-              <h3>Jedna aplikacja, kilka nastrojów, zero tłumaczenia zasad.</h3>
+              <h3>
+                Jedna aplikacja, kilka nastrojów i zero czytania długich zasad.
+              </h3>
               <p>
-                Wybieracie tryb, podajecie telefon dalej i po chwili już trwa gra
-                albo rozmowa. Interfejs robi robotę za was.
+                Wybieracie tryb, podajecie telefon dalej i po chwili trwa już
+                gra albo rozmowa. Interfejs robi sporą część roboty za was.
               </p>
             </article>
           </div>
         </div>
       </section>
 
-      <section id="tryby" class="section section-modes">
+      <section
+        id="tryby"
+        class="section section-modes"
+        aria-labelledby="modes-title"
+      >
         <div class="section-shell">
           <div class="section-heading reveal">
             <p class="eyebrow">Tryby</p>
-            <h2>Każdy ekran ma inny klimat, ale ten sam cel: ruszyć wieczór</h2>
+            <h2 id="modes-title">
+              Każdy ekran ma inny klimat, ale ten sam cel: ruszyć wieczór
+            </h2>
+            <p class="section-lead">
+              Strona pokazuje aplikację jako zestaw gotowych scenariuszy, nie
+              tylko listę funkcji. Dzięki temu od razu wiadomo, dla jakiego
+              momentu jest dany tryb.
+            </p>
           </div>
+
           <div class="modes-grid">
-            <article class="mode-card reveal">
-              <img src="graphics/mode-classic.svg" alt="" aria-hidden="true" />
+            <article class="mode-card mode-card--classic reveal">
+              <img
+                src="graphics/mode-classic.svg"
+                alt=""
+                aria-hidden="true"
+                width="120"
+                height="120"
+              />
               <div>
                 <p class="mode-group">Klasyka</p>
                 <h3>36 pytań</h3>
-                <p>Sprawdzona ścieżka od lekkiego otwarcia do głębszej rozmowy.</p>
+                <p>
+                  Sprawdzona ścieżka od lekkiego otwarcia do głębszej rozmowy.
+                </p>
+                <p class="mode-note">Dobry pierwszy krok dla nowych osób.</p>
               </div>
             </article>
-            <article class="mode-card reveal">
-              <img src="graphics/mode-talk.svg" alt="" aria-hidden="true" />
+
+            <article class="mode-card mode-card--talk reveal">
+              <img
+                src="graphics/mode-talk.svg"
+                alt=""
+                aria-hidden="true"
+                width="120"
+                height="120"
+              />
               <div>
                 <p class="mode-group">Relacje</p>
                 <h3>Rozmowy i emocje</h3>
-                <p>Lżejsze i poważniejsze scenariusze, kiedy chcecie naprawdę pogadać.</p>
+                <p>
+                  Lżejsze i poważniejsze scenariusze, kiedy chcecie naprawdę
+                  pogadać.
+                </p>
+                <p class="mode-note">
+                  Bez presji, ale z wyraźnym prowadzeniem.
+                </p>
               </div>
             </article>
-            <article class="mode-card reveal">
-              <img src="graphics/mode-talk.svg" alt="" aria-hidden="true" />
+
+            <article class="mode-card mode-card--chemistry reveal">
+              <img
+                src="graphics/mode-talk.svg"
+                alt=""
+                aria-hidden="true"
+                width="120"
+                height="120"
+              />
               <div>
                 <p class="mode-group">Napięcie</p>
                 <h3>Chemia</h3>
-                <p>Tryb nastawiony na iskrę, napięcie i trochę odważniejsze tempo.</p>
+                <p>
+                  Tryb nastawiony na iskrę, flirt i trochę odważniejsze tempo.
+                </p>
+                <p class="mode-note">
+                  Wyraźnie inna energia niż klasyczna rozmowa.
+                </p>
               </div>
             </article>
-            <article class="mode-card reveal">
-              <img src="graphics/mode-talk.svg" alt="" aria-hidden="true" />
+
+            <article class="mode-card mode-card--afteryears reveal">
+              <img
+                src="graphics/mode-talk.svg"
+                alt=""
+                aria-hidden="true"
+                width="120"
+                height="120"
+              />
               <div>
                 <p class="mode-group">Po czasie</p>
                 <h3>Po latach</h3>
-                <p>Format dla osób, które chcą odkryć się na nowo i wrócić do pytań.</p>
+                <p>
+                  Format dla osób, które chcą odkryć się na nowo i wrócić do
+                  pytań.
+                </p>
+                <p class="mode-note">
+                  Spokojniejszy rytm i większy nacisk na bliskość.
+                </p>
               </div>
             </article>
-            <article class="mode-card reveal">
-              <img src="graphics/mode-talk.svg" alt="" aria-hidden="true" />
+
+            <article class="mode-card mode-card--solo reveal">
+              <img
+                src="graphics/mode-talk.svg"
+                alt=""
+                aria-hidden="true"
+                width="120"
+                height="120"
+              />
               <div>
                 <p class="mode-group">Solo</p>
                 <h3>Obudź się</h3>
-                <p>Spokojniejszy moduł do zatrzymania się, refleksji i zmiany nastroju.</p>
+                <p>
+                  Moduł do zatrzymania się, refleksji i lekkiego resetu
+                  nastroju.
+                </p>
+                <p class="mode-note">
+                  Dla momentów, kiedy chcesz pobyć chwilę ze sobą.
+                </p>
               </div>
             </article>
-            <article class="mode-card reveal">
-              <img src="graphics/mode-crazy.svg" alt="" aria-hidden="true" />
+
+            <article class="mode-card mode-card--crazy reveal">
+              <img
+                src="graphics/mode-crazy.svg"
+                alt=""
+                aria-hidden="true"
+                width="120"
+                height="120"
+              />
               <div>
                 <p class="mode-group">Impreza</p>
                 <h3>Karty Wariata</h3>
-                <p>Najmocniejszy tryb w apce: szybkie rundy, wybory, reveal i chaos meter.</p>
+                <p>
+                  Najmocniejszy tryb w apce: szybkie rundy, wybory, reveal i
+                  chaos meter.
+                </p>
+                <p class="mode-note">
+                  Jeden telefon, głośny stół i szybkie wejście w zasady.
+                </p>
               </div>
             </article>
           </div>
         </div>
       </section>
 
-      <section id="karty-wariata" class="section section-feature">
+      <section
+        id="karty-wariata"
+        class="section section-feature"
+        aria-labelledby="feature-title"
+      >
         <div class="section-shell feature-layout">
           <div class="feature-copy reveal">
-            <p class="eyebrow">Nowy MVP</p>
-            <h2>Karty Wariata wyglądają jak osobna gra w środku aplikacji.</h2>
+            <p class="eyebrow">Mocny tryb grupowy</p>
+            <h2 id="feature-title">
+              Karty Wariata wyglądają jak osobna gra ukryta w środku aplikacji.
+            </h2>
             <p>
-              To nie jest tylko zestaw pytań. Tryb ma własny setup, prowadzenie rund,
-              chaos curve, vibe preset, hand size, wyniki, ranking i autozapis sesji.
+              To nie jest tylko zestaw pytań. Tryb ma własny setup, prowadzenie
+              rund, wzrost intensywności, wyniki, ranking i autozapis sesji.
             </p>
-            <div class="feature-stats" aria-label="Najważniejsze cechy trybu Karty Wariata">
+
+            <div class="feature-stats">
               <div>
                 <strong>3-8</strong>
-                <span>graczy</span>
+                <span>graczy przy jednym telefonie</span>
               </div>
               <div>
                 <strong>30-60 min</strong>
-                <span>na sesję</span>
+                <span>na pełną sesję</span>
               </div>
               <div>
-                <strong>Pass-and-play</strong>
-                <span>na jednym telefonie</span>
+                <strong>Zero tłumaczenia</strong>
+                <span>bo ekran prowadzi rundę</span>
               </div>
             </div>
+
             <ul class="feature-list">
               <li>setup graczy, długości gry i klimatu</li>
-              <li>prowadzenie rund z krótkim briefingiem</li>
+              <li>krótki briefing przed rundą zamiast ściany tekstu</li>
               <li>płynny reveal kart i szybkie ogłaszanie wyniku</li>
               <li>wzrost intensywności przez chaos meter</li>
             </ul>
           </div>
+
           <div class="feature-visual reveal">
-            <img
-              src="graphics/Screenshot_20260509_003426.jpg"
-              alt="Ekran aplikacji z trybem imprezowym Karty Wariata"
-              loading="lazy"
-            />
+            <figure class="feature-shot">
+              <img
+                src="graphics/Screenshot_20260509_003323.jpg"
+                alt="Ekran onboardingu Karty Wariata z zasadami rund, głosowania i punktacji"
+                width="1080"
+                height="2091"
+                loading="lazy"
+                decoding="async"
+              />
+            </figure>
+
+            <article class="feature-visual-note">
+              <p class="feature-note-kicker">Na ekranie</p>
+              <h3>Krótki onboarding bez tłumaczenia zasad na głos</h3>
+              <p>
+                Ten widok od razu pokazuje rytm rozgrywki: kolejkę odpowiedzi,
+                głosowanie, punktację i opcjonalne modyfikatory przed startem
+                sesji.
+              </p>
+            </article>
           </div>
         </div>
       </section>
 
-      <section class="section section-flow">
+      <section class="section section-flow" aria-labelledby="flow-title">
         <div class="section-shell">
           <div class="section-heading reveal">
             <p class="eyebrow">Jak to działa</p>
-            <h2>Wchodzicie, wybieracie nastrój i aplikacja prowadzi wieczór dalej</h2>
+            <h2 id="flow-title">
+              Wchodzicie, wybieracie nastrój i aplikacja prowadzi wieczór dalej
+            </h2>
           </div>
+
           <div class="flow-grid">
             <article class="flow-step reveal">
               <span>01</span>
               <h3>Wybierz tryb</h3>
-              <p>Rozmowa, chemia, klasyka albo impreza. Start zajmuje chwilę.</p>
+              <p>
+                Rozmowa, chemia, klasyka albo impreza. Start zajmuje chwilę.
+              </p>
             </article>
+
             <article class="flow-step reveal">
               <span>02</span>
               <h3>Dopasuj tempo</h3>
-              <p>W trybie grupowym ustawiasz graczy, długość sesji i poziom energii.</p>
+              <p>
+                W trybie grupowym ustawiasz graczy, długość sesji i poziom
+                energii.
+              </p>
             </article>
+
             <article class="flow-step reveal">
               <span>03</span>
               <h3>Graj bez zgrzytów</h3>
-              <p>Interfejs, autozapis i rytm ekranów ograniczają przestoje do minimum.</p>
+              <p>
+                Interfejs, autozapis i rytm ekranów ograniczają przestoje do
+                minimum.
+              </p>
             </article>
           </div>
         </div>
       </section>
 
-      <section id="ekrany" class="section section-gallery">
+      <section
+        id="ekrany"
+        class="section section-gallery"
+        aria-labelledby="gallery-title"
+      >
         <div class="section-shell">
           <div class="section-heading reveal">
             <p class="eyebrow">Ekrany aplikacji</p>
-            <h2>Prawdziwe widoki z apki, nie makiety</h2>
+            <h2 id="gallery-title">Prawdziwe widoki z apki, nie makiety</h2>
+            <p class="section-lead">
+              Każdy ekran mówi trochę innym językiem wizualnym, ale wszystkie
+              mają wspólny cel: szybko ustawić właściwą energię rozmowy albo
+              gry.
+            </p>
           </div>
+
           <div class="gallery-shell reveal" data-gallery>
-            <figure class="gallery-stage">
-              <img
-                class="gallery-stage-image"
-                src="graphics/Screenshot_20260509_003251.jpg"
-                alt="Ekran startowy aplikacji"
-                data-gallery-stage
-              />
-              <figcaption data-gallery-caption>
-                Ekran główny z podziałem na spokojniejsze tryby i sekcję grupową.
-              </figcaption>
-            </figure>
-            <div class="gallery-thumbs" role="tablist" aria-label="Wybór ekranów aplikacji">
+            <div class="gallery-main" id="gallery-display">
+              <figure class="gallery-stage">
+                <div class="gallery-stage-frame">
+                  <img
+                    class="gallery-stage-image"
+                    src="graphics/Screenshot_20260509_003251.jpg"
+                    alt="Ekran startowy aplikacji"
+                    width="1080"
+                    height="2097"
+                    data-gallery-stage
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <button
+                    class="gallery-zoom"
+                    type="button"
+                    data-gallery-zoom
+                    aria-label="Powiększ aktualny ekran aplikacji"
+                  >
+                    Powiększ
+                  </button>
+                </div>
+                <figcaption data-gallery-caption>
+                  Menu wejściowe z podziałem na solo, duet i tryb grupowy.
+                </figcaption>
+              </figure>
+
+              <article class="gallery-info">
+                <p class="gallery-info-tag" data-gallery-tag>Start</p>
+                <h3 data-gallery-title>Menu główne</h3>
+                <p class="gallery-info-summary" data-gallery-summary>
+                  Pierwszy ekran od razu rozdziela solo, tryby dla par i sekcję
+                  grupową, więc użytkownik od razu wie, gdzie wejść.
+                </p>
+                <ul class="gallery-points" data-gallery-points>
+                  <li>3 szybkie wejścia do różnych nastrojów</li>
+                  <li>Duże kafle bez tłumaczenia zasad</li>
+                  <li>Czytelny podział na solo, duet i ekipę</li>
+                </ul>
+              </article>
+            </div>
+
+            <div
+              class="gallery-thumbs"
+              role="tablist"
+              aria-label="Wybór ekranów aplikacji"
+            >
               <button
                 class="gallery-thumb is-active"
                 type="button"
+                role="tab"
+                aria-selected="true"
+                tabindex="0"
+                aria-controls="gallery-display"
                 data-image="graphics/Screenshot_20260509_003251.jpg"
-                data-caption="Ekran główny z podziałem na spokojniejsze tryby i sekcję grupową."
+                data-tag="Start"
+                data-title="Menu główne"
+                data-caption="Menu wejściowe z podziałem na solo, duet i tryb grupowy."
+                data-summary="Pierwszy ekran od razu rozdziela solo, tryby dla par i sekcję grupową, więc użytkownik od razu wie, gdzie wejść."
+                data-points="3 szybkie wejścia do różnych nastrojów|Duże kafle bez tłumaczenia zasad|Czytelny podział na solo, duet i ekipę"
                 data-alt="Ekran startowy aplikacji"
               >
-                <img src="graphics/Screenshot_20260509_003251.jpg" alt="" aria-hidden="true" />
+                <span class="gallery-thumb-media">
+                  <img
+                    src="graphics/Screenshot_20260509_003251.jpg"
+                    alt=""
+                    aria-hidden="true"
+                    width="1080"
+                    height="2097"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+                <span class="gallery-thumb-copy">
+                  <span class="gallery-thumb-tag">Start</span>
+                  <strong>Menu główne</strong>
+                  <span>Wybór klimatu</span>
+                </span>
               </button>
+
               <button
                 class="gallery-thumb"
                 type="button"
-                data-image="graphics/Screenshot_20260509_003323.jpg"
-                data-caption="Klasyczne tryby rozmowy z miękkim, czytelnym układem i dużą typografią."
-                data-alt="Widok klasycznych trybów rozmowy"
+                role="tab"
+                aria-selected="false"
+                tabindex="-1"
+                aria-controls="gallery-display"
+                data-image="graphics/Screenshot_20260509_003342.jpg"
+                data-tag="Klasyka"
+                data-title="36 pytań"
+                data-caption="Przegląd spokojniejszych trybów dla par z klasyką na pierwszym planie."
+                data-summary="Ekran zbiera najważniejsze scenariusze dla par i prowadzi od klasyki do rozmów, chemii i trybu po latach."
+                data-points="Naturalny punkt startu dla nowych osób|Widoczne przejścia do kilku ścieżek relacyjnych|Czytelny, spokojny layout"
+                data-alt="Widok klasycznych trybów aplikacji dla par"
               >
-                <img src="graphics/Screenshot_20260509_003323.jpg" alt="" aria-hidden="true" />
+                <span class="gallery-thumb-media">
+                  <img
+                    src="graphics/Screenshot_20260509_003342.jpg"
+                    alt=""
+                    aria-hidden="true"
+                    width="1080"
+                    height="2079"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+                <span class="gallery-thumb-copy">
+                  <span class="gallery-thumb-tag">Klasyka</span>
+                  <strong>36 pytań</strong>
+                  <span>Scenariusze dla par</span>
+                </span>
               </button>
+
               <button
                 class="gallery-thumb"
                 type="button"
+                role="tab"
+                aria-selected="false"
+                tabindex="-1"
+                aria-controls="gallery-display"
                 data-image="graphics/Screenshot_20260509_003347.jpg"
-                data-caption="Tryb grupowy z mocniejszym charakterem wizualnym i wyraźnym kierunkiem zabawy."
-                data-alt="Ekran grupowego trybu imprezowego"
+                data-tag="Rozmowy"
+                data-title="Tryb rozmów"
+                data-caption="Onboarding trybu rozmów z lekkim wejściem i rosnącą głębią."
+                data-summary="Ten ekran ustawia bezpieczny ton i obiecuje stopniowe wejście w głębszą rozmowę bez presji."
+                data-points="Stopniowanie trudności pytań|Akcent na dialog, nie monolog|Ciepły onboarding"
+                data-alt="Ekran trybu rozmów dla par"
               >
-                <img src="graphics/Screenshot_20260509_003347.jpg" alt="" aria-hidden="true" />
+                <span class="gallery-thumb-media">
+                  <img
+                    src="graphics/Screenshot_20260509_003347.jpg"
+                    alt=""
+                    aria-hidden="true"
+                    width="1080"
+                    height="2092"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+                <span class="gallery-thumb-copy">
+                  <span class="gallery-thumb-tag">Rozmowy</span>
+                  <strong>Tryb rozmów</strong>
+                  <span>Lekkie wejście</span>
+                </span>
               </button>
+
               <button
                 class="gallery-thumb"
                 type="button"
+                role="tab"
+                aria-selected="false"
+                tabindex="-1"
+                aria-controls="gallery-display"
                 data-image="graphics/Screenshot_20260509_003354.jpg"
-                data-caption="Rozmowy dla dwojga z ciepłym klimatem i bardziej romantycznym tonem."
-                data-alt="Ekran rozmów dla dwojga"
+                data-tag="Chemia"
+                data-title="Tryb iskry"
+                data-caption="Tryb chemii z mocniejszym, bardziej flirtującym tonem."
+                data-summary="Ekran mocniej akcentuje napięcie, flirt i odważniejsze pytania, więc dobrze komunikuje zmianę energii względem klasycznej rozmowy."
+                data-points="Wyraźnie bardziej flirtujący klimat|Więcej napięcia i odwagi|Spójna, ciepła paleta"
+                data-alt="Ekran trybu chemii dla dwojga"
               >
-                <img src="graphics/Screenshot_20260509_003354.jpg" alt="" aria-hidden="true" />
+                <span class="gallery-thumb-media">
+                  <img
+                    src="graphics/Screenshot_20260509_003354.jpg"
+                    alt=""
+                    aria-hidden="true"
+                    width="1080"
+                    height="2088"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+                <span class="gallery-thumb-copy">
+                  <span class="gallery-thumb-tag">Chemia</span>
+                  <strong>Tryb iskry</strong>
+                  <span>Napięcie i flirt</span>
+                </span>
               </button>
+
               <button
                 class="gallery-thumb"
                 type="button"
+                role="tab"
+                aria-selected="false"
+                tabindex="-1"
+                aria-controls="gallery-display"
                 data-image="graphics/Screenshot_20260509_003358.jpg"
-                data-caption="Dalsze widoki trybów relacyjnych z czytelnymi blokami i dużymi punktami wejścia."
-                data-alt="Ekran alternatywnych trybów relacyjnych"
+                data-tag="Po latach"
+                data-title="Tryb bliskości"
+                data-caption="Tryb bliskości skupiony na odbudowie relacji i spokojniejszym tempie."
+                data-summary="Widok jest bardziej ciepły i spokojny, nastawiony na odbudowanie bliskości oraz powrót do wspólnej historii."
+                data-points="Spokojniejsze tempo|Odbudowa bliskości i wspomnień|Czytelne odróżnienie od chemii"
+                data-alt="Ekran trybu bliskości i odbudowy relacji"
               >
-                <img src="graphics/Screenshot_20260509_003358.jpg" alt="" aria-hidden="true" />
+                <span class="gallery-thumb-media">
+                  <img
+                    src="graphics/Screenshot_20260509_003358.jpg"
+                    alt=""
+                    aria-hidden="true"
+                    width="1080"
+                    height="2093"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+                <span class="gallery-thumb-copy">
+                  <span class="gallery-thumb-tag">Po latach</span>
+                  <strong>Tryb bliskości</strong>
+                  <span>Spokojny reset</span>
+                </span>
               </button>
+
               <button
                 class="gallery-thumb"
                 type="button"
+                role="tab"
+                aria-selected="false"
+                tabindex="-1"
+                aria-controls="gallery-display"
                 data-image="graphics/Screenshot_20260509_003426.jpg"
-                data-caption="Sekcja imprezowa pokazująca najbardziej energetyczny obszar aplikacji."
-                data-alt="Ekran imprezowego obszaru aplikacji"
+                data-tag="Dopasowanie"
+                data-title="Test dopasowania"
+                data-caption="Tryb dopasowania z czterema obszarami oceny relacji."
+                data-summary="Screen komunikuje prostą obietnicę wyniku i od razu pokazuje konkretne obszary: komunikację, emocje, przyciąganie i myślenie."
+                data-points="4 obszary relacji na jednym ekranie|Czytelna obietnica wyniku|Dobre szybkie wejście dla par"
+                data-alt="Ekran trybu dopasowania dla par"
               >
-                <img src="graphics/Screenshot_20260509_003426.jpg" alt="" aria-hidden="true" />
+                <span class="gallery-thumb-media">
+                  <img
+                    src="graphics/Screenshot_20260509_003426.jpg"
+                    alt=""
+                    aria-hidden="true"
+                    width="1080"
+                    height="2073"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+                <span class="gallery-thumb-copy">
+                  <span class="gallery-thumb-tag">Dopasowanie</span>
+                  <strong>Test dopasowania</strong>
+                  <span>Komunikacja i emocje</span>
+                </span>
+              </button>
+
+              <button
+                class="gallery-thumb"
+                type="button"
+                role="tab"
+                aria-selected="false"
+                tabindex="-1"
+                aria-controls="gallery-display"
+                data-image="graphics/Screenshot_20260509_003323.jpg"
+                data-tag="Impreza"
+                data-title="Karty Wariata"
+                data-caption="Onboarding Karty Wariata z zasadami rund, głosowania i punktacji."
+                data-summary="Tutaj aplikacja zmienia ton: ekran tłumaczy szybkie zasady rund, głosowania i punktacji, więc grupa od razu wie, jak grać."
+                data-points="4 proste kroki do startu sesji|Jeden telefon, pass-and-play|Mocny, imprezowy klimat od pierwszej sekundy"
+                data-alt="Ekran zasad trybu Karty Wariata"
+              >
+                <span class="gallery-thumb-media">
+                  <img
+                    src="graphics/Screenshot_20260509_003323.jpg"
+                    alt=""
+                    aria-hidden="true"
+                    width="1080"
+                    height="2091"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+                <span class="gallery-thumb-copy">
+                  <span class="gallery-thumb-tag">Impreza</span>
+                  <strong>Karty Wariata</strong>
+                  <span>Zasady gry</span>
+                </span>
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="section section-cta">
+      <section class="section section-cta" aria-labelledby="cta-title">
         <div class="section-shell cta-band reveal">
           <div>
             <p class="eyebrow">Gotowe na wieczór</p>
-            <h2>36 pytań jest już przygotowane na spokojny wieczór i głośny playtest.</h2>
+            <h2 id="cta-title">
+              36 pytań jest gotowe i na spokojny wieczór, i na głośny playtest.
+            </h2>
+            <p class="cta-copy">
+              Jeśli chcesz sprawdzić, jak wygląda przejście od relacji do
+              imprezy w jednej apce, tutaj masz to pokazane bez marketingowego
+              dymu.
+            </p>
           </div>
+
           <div class="cta-actions">
             <a
               class="btn btn-primary"
@@ -371,8 +836,11 @@
       <div class="footer-shell">
         <div>
           <p class="footer-brand">36 pytań</p>
-          <p class="footer-copy">Rozmowy, emocje, chemia i imprezowy chaos w jednej aplikacji.</p>
+          <p class="footer-copy">
+            Rozmowy, emocje, chemia i imprezowy chaos w jednej aplikacji.
+          </p>
         </div>
+
         <div class="footer-meta">
           <p>Android app</p>
           <p>2026</p>

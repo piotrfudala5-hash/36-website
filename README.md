@@ -1,39 +1,49 @@
 # 36-website
 
-Landing page WWW przygotowany na bazie projektu Flutter `moja_apka`.
+Statyczny landing page WWW dla aplikacji `36 pytań`, przygotowany jako osobny,
+lekki frontend do publikacji na hostingu statycznym.
 
 ## Co zawiera
 
-- responsywny landing page (desktop/mobile)
-- sekcje trybów gry inspirowane aplikacją (Classic 36, Rozmowy, Karty Wariata)
-- animacje wejścia elementów
-- gotową strukturę pod publikację statyczną
+- responsywny landing page dla desktopu i mobile
+- sekcje pokazujące tryby aplikacji: relacje, chemia i Karty Wariata
+- galerię prawdziwych screenshotów z aplikacji
+- lekkie animacje wejścia i prostą logikę galerii w czystym JavaScript
+- gotową strukturę pod GitHub Pages
 
 ## Uruchomienie lokalne
 
-Otwórz plik `index.html` w przeglądarce.
+Najprościej uruchomić lokalny serwer statyczny w katalogu `36-website`:
+
+```powershell
+python -m http.server 4173
+```
+
+Potem otwórz `http://localhost:4173`.
+
+Można też otworzyć samo `index.html`, ale lokalny serwer lepiej odwzorowuje
+docelowe zachowanie strony.
 
 ## Publikacja
 
-Możesz wdrożyć stronę na dowolnym hostingu statycznym (GitHub Pages, Netlify, Vercel).
+Stronę możesz wdrożyć na dowolnym hostingu statycznym: GitHub Pages, Netlify,
+Vercel albo własny serwer.
 
-### GitHub Pages (automatycznie)
+### GitHub Pages
 
 W repo jest gotowy workflow: `.github/workflows/deploy-pages.yml`.
 
-1. Wejdź w ustawienia repo: Settings -> Pages.
-2. W Source wybierz GitHub Actions.
+1. Wejdź w `Settings -> Pages`.
+2. W `Source` wybierz `GitHub Actions`.
 3. Każdy push na `main` automatycznie wdroży stronę.
 
-### Podmiana screenshotów
+## Podmiana screenshotów
 
-Sekcja screenshotów jest w `index.html` pod `#sekcja-screenshoty`.
-Podmień wartości `src` w trzech tagach `<img>` na swoje linki do screenów.
+Screenshoty i grafiki znajdują się w katalogu `graphics/`.
 
-### Baner hero (Google App)
+- sekcja hero używa `graphics/banner-google-app.png`
+- sekcja galerii korzysta z plików `graphics/Screenshot_*.jpg`
+- ikony trybów to pliki SVG z tego samego katalogu
 
-Aby aktywować baner w sekcji hero, dodaj plik:
-
-- `graphics/banner-google-app.webp`
-
-Layout ma fallback, ale po dodaniu pliku baner pojawi sie automatycznie.
+Po podmianie obrazów wystarczy zaktualizować odpowiednie `src`, `alt` oraz,
+jeśli trzeba, wymiary `width` i `height` w `index.html`.
