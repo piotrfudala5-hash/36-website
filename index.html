@@ -1,11 +1,101 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pl">
-<head>
-  <meta charset="UTF-8">
-  <title>36</title>
-</head>
-<body>
-  <h1>36</h1>
-  <p>Official website of the 36 mobile app.</p>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>36 Website | Gra Imprezowa</title>
+    <meta
+      name="description"
+      content="36 Website - strona gry imprezowej inspirowanej projektem Flutter: 36 pytań, tryb rozmowy i Karty Wariata."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Bricolage+Grotesque:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-noise" aria-hidden="true"></div>
+    <div class="orb orb-left" aria-hidden="true"></div>
+    <div class="orb orb-right" aria-hidden="true"></div>
+
+    <header class="site-header reveal">
+      <p class="brand">36 Website</p>
+      <a class="cta-small" href="#sekcja-pobierz">Pobierz APK</a>
+    </header>
+
+    <main>
+      <section class="hero reveal">
+        <p class="eyebrow">Gra imprezowa oparta o projekt Flutter</p>
+        <h1>Rozmowy, chemia i kontrolowany chaos w jednej aplikacji.</h1>
+        <p class="lead">
+          Ten landing page reprezentuje projekt "moja_apka" i jego kluczowe tryby:
+          classic36, rozmowy oraz Karty Wariata.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#sekcja-trypy">Poznaj tryby</a>
+          <a class="btn btn-ghost" href="#sekcja-pobierz">Wersja testowa</a>
+        </div>
+      </section>
+
+      <section id="sekcja-trypy" class="modes">
+        <article class="mode-card reveal" style="--delay: 0ms">
+          <h2>Classic 36</h2>
+          <p>
+            Sekwencyjny flow pytań, który prowadzi graczy od lekkiego startu do
+            głębszej rozmowy.
+          </p>
+        </article>
+
+        <article class="mode-card reveal" style="--delay: 140ms">
+          <h2>Rozmowy</h2>
+          <p>
+            Alternatywne scenariusze dla par i znajomych: lżejsze, poważniejsze
+            lub tematyczne zestawy pytań.
+          </p>
+        </article>
+
+        <article class="mode-card reveal" style="--delay: 280ms">
+          <h2>Karty Wariata</h2>
+          <p>
+            Dynamiczny tryb imprezowy z mutatorami, zmienną intensywnością i
+            mechaniką utrzymującą tempo rozgrywki.
+          </p>
+        </article>
+      </section>
+
+      <section class="stats reveal">
+        <div>
+          <p class="stat-number">3</p>
+          <p class="stat-label">główne style gry</p>
+        </div>
+        <div>
+          <p class="stat-number">1</p>
+          <p class="stat-label">silnik Flutter</p>
+        </div>
+        <div>
+          <p class="stat-number">∞</p>
+          <p class="stat-label">potencjał na wieczór</p>
+        </div>
+      </section>
+
+      <section id="sekcja-pobierz" class="download reveal">
+        <h2>Wersja Android</h2>
+        <p>
+          Podłącz ten landing page do aktualnych artefaktów APK/AAB z Twojego
+          pipeline i dodaj bezpośredni link do pobrania.
+        </p>
+        <a class="btn btn-primary" href="#" aria-disabled="true">Link do APK (uzupełnij)</a>
+      </section>
+    </main>
+
+    <footer class="site-footer reveal">
+      <p>36 Website • 2026</p>
+      <p>Stworzone na bazie projektu "moja_apka"</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
 </html>
