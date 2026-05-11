@@ -257,3 +257,42 @@ if (gallery) {
     activateThumb(thumbs[0]);
   }
 }
+
+const contactForm = document.querySelector("[data-contact-form]");
+
+if (contactForm) {
+  const contactStatus = contactForm.querySelector("[data-contact-status]");
+
+  contactForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(contactForm);
+    const name = String(formData.get("name") || "").trim();
+    const email = String(formData.get("email") || "").trim();
+    const topic = String(formData.get("topic") || "").trim();
+    const message = String(formData.get("message") || "").trim();
+
+    const subject = encodeURIComponent(
+      `36 pytań - ${topic || "kontakt ze strony"}`,
+    );
+    const body = encodeURIComponent(
+      [
+        `Imię: ${name}`,
+        `E-mail: ${email}`,
+        `Temat: ${topic}`,
+        "",
+        "Wiadomość:",
+        message,
+        "",
+        "Wysłane z formularza na 36app.pl",
+      ].join("\n"),
+    );
+
+    window.location.href = `mailto:fudi4madcode@gmail.com?subject=${subject}&body=${body}`;
+
+    if (contactStatus) {
+      contactStatus.textContent =
+        "Otwieram aplikację pocztową z gotową wiadomością. Jeśli nic się nie wydarzy, napisz bezpośrednio na fudi4madcode@gmail.com.";
+    }
+  });
+}
