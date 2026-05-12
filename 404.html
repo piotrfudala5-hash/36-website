@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Przekierowanie - 36</title>
+    <script>
+      (function () {
+        var normalizedPath = window.location.pathname.replace(/\/+$/, '');
+        if (normalizedPath === '/madstat') {
+          window.location.replace('/madstat/index.html' + window.location.search + window.location.hash);
+        }
+      })();
+    </script>
+    <style>
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #17201c;
+        background: #f6fbf7;
+      }
+      main {
+        max-width: 32rem;
+        padding: 2rem;
+        text-align: center;
+      }
+      a {
+        color: #116b4f;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Nie znaleziono strony</h1>
+      <p>Jeśli szukasz panelu madstat, przejdź do <a href="/madstat/index.html">/madstat/index.html</a>.</p>
+    </main>
+  </body>
+</html>
