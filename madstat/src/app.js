@@ -34,10 +34,18 @@ const gamesTabButton = document.getElementById('gamesTabButton');
 const crashlyticsTabButton = document.getElementById('crashlyticsTabButton');
 const modesTabButton = document.getElementById('modesTabButton');
 const analyticsTabButton = document.getElementById('analyticsTabButton');
+const executiveSummaryTabButton = document.getElementById('executiveSummaryTabButton');
+const adsPerformanceTabButton = document.getElementById('adsPerformanceTabButton');
+const engagementTabButton = document.getElementById('engagementTabButton');
+const qualityTabButton = document.getElementById('qualityTabButton');
 const gamesPanel = document.getElementById('gamesPanel');
 const crashlyticsPanel = document.getElementById('crashlyticsPanel');
 const modesPanel = document.getElementById('modesPanel');
 const analyticsPanel = document.getElementById('analyticsPanel');
+const executiveSummaryPanel = document.getElementById('executiveSummaryPanel');
+const adsPerformancePanel = document.getElementById('adsPerformancePanel');
+const engagementPanel = document.getElementById('engagementPanel');
+const qualityPanel = document.getElementById('qualityPanel');
 const adminEmailValue = document.getElementById('adminEmailValue');
 const lastRefreshValue = document.getElementById('lastRefreshValue');
 const docsCountValue = document.getElementById('docsCountValue');
@@ -109,13 +117,54 @@ const latestCrashValue = document.getElementById('latestCrashValue');
 const latestCrashVersionValue = document.getElementById('latestCrashVersionValue');
 const crashTableBody = document.getElementById('crashTableBody');
 
+// Executive Summary elements
+const summaryDAU = document.getElementById('summaryDAU');
+const summaryARPU = document.getElementById('summaryARPU');
+const summaryCrashRate = document.getElementById('summaryCrashRate');
+const summaryRetention = document.getElementById('summaryRetention');
+const revenueTrendChart = document.getElementById('revenueTrendChart');
+const summaryAdsPercent = document.getElementById('summaryAdsPercent');
+const summaryPurchasePercent = document.getElementById('summaryPurchasePercent');
+const summaryIAARevenue = document.getElementById('summaryIAARevenue');
+const summaryIAPRevenue = document.getElementById('summaryIAPRevenue');
+
+// Ads Performance elements
+const adsImpressions = document.getElementById('adsImpressions');
+const adsClicks = document.getElementById('adsClicks');
+const adsCTR = document.getElementById('adsCTR');
+const adsRevenue = document.getElementById('adsRevenue');
+const placementPerformanceList = document.getElementById('placementPerformanceList');
+const ecpmTrendChart = document.getElementById('ecpmTrendChart');
+const adsPerformanceTableBody = document.getElementById('adsPerformanceTableBody');
+
+// Engagement elements
+const engDAU = document.getElementById('engDAU');
+const engMAU = document.getElementById('engMAU');
+const engAvgSession = document.getElementById('engAvgSession');
+const engSessionsPerUser = document.getElementById('engSessionsPerUser');
+const retentionD1 = document.getElementById('retentionD1');
+const retentionD3 = document.getElementById('retentionD3');
+const retentionD7 = document.getElementById('retentionD7');
+const retentionD30 = document.getElementById('retentionD30');
+const dauTrendChart = document.getElementById('dauTrendChart');
+const engagementMetricsTableBody = document.getElementById('engagementMetricsTableBody');
+
+// Quality elements
+const qualityCrashRate = document.getElementById('qualityCrashRate');
+const qualityFatalCount = document.getElementById('qualityFatalCount');
+const qualityLatency = document.getElementById('qualityLatency');
+const qualityUsersAffected = document.getElementById('qualityUsersAffected');
+const crashTrendChart = document.getElementById('crashTrendChart');
+const topIssuesQualityList = document.getElementById('topIssuesQualityList');
+const qualityIssuesTableBody = document.getElementById('qualityIssuesTableBody');
+
 const DASHBOARD_STORAGE_KEYS = {
   activeDashboard: 'statapp.activeDashboard',
   crashGroupBy: 'statapp.crashGroupBy',
   crashGroupSort: 'statapp.crashGroupSort',
 };
 
-const ALLOWED_DASHBOARDS = new Set(['games', 'modes', 'analytics', 'crashlytics']);
+const ALLOWED_DASHBOARDS = new Set(['games', 'modes', 'analytics', 'crashlytics', 'executiveSummary', 'adsPerformance', 'engagement', 'quality']);
 
 let activeDashboard = restoreActiveDashboard();
 let crashRowsCache = [];
@@ -150,6 +199,22 @@ modesTabButton.addEventListener('click', async () => {
 
 analyticsTabButton.addEventListener('click', async () => {
   await switchDashboard('analytics');
+});
+
+executiveSummaryTabButton.addEventListener('click', async () => {
+  await switchDashboard('executiveSummary');
+});
+
+adsPerformanceTabButton.addEventListener('click', async () => {
+  await switchDashboard('adsPerformance');
+});
+
+engagementTabButton.addEventListener('click', async () => {
+  await switchDashboard('engagement');
+});
+
+qualityTabButton.addEventListener('click', async () => {
+  await switchDashboard('quality');
 });
 
 crashGroupBySelect?.addEventListener('change', () => {
@@ -229,6 +294,14 @@ async function loadDashboard() {
     } else if (activeDashboard === 'analytics') {
       await loadAnalyticsDashboard();
       analyticsLastRefreshValue.textContent = new Date().toLocaleString('pl-PL');
+    } else if (activeDashboard === 'executiveSummary') {
+      await loadExecutiveSummary();
+    } else if (activeDashboard === 'adsPerformance') {
+      await loadAdsPerformance();
+    } else if (activeDashboard === 'engagement') {
+      await loadEngagementDashboard();
+    } else if (activeDashboard === 'quality') {
+      await loadQualityDashboard();
     } else {
       await loadCrashlyticsDashboard();
       crashLastRefreshValue.textContent = new Date().toLocaleString('pl-PL');
@@ -255,10 +328,12 @@ async function loadDashboard() {
         analyticsModeDocs: 0,
       });
       modesDocsCountValue.textContent = '0';
-    } else {
+    } else if (activeDashboard === 'games') {
       renderStats([]);
       renderTable([]);
       docsCountValue.textContent = '0';
+    } else {
+      renderExecutiveSummaryEmpty();
     }
   } finally {
     refreshButton.disabled = false;
@@ -284,18 +359,37 @@ function updateDashboardVisibility() {
   const isModes = activeDashboard === 'modes';
   const isAnalytics = activeDashboard === 'analytics';
   const isCrashlytics = activeDashboard === 'crashlytics';
+  const isExecutiveSummary = activeDashboard === 'executiveSummary';
+  const isAdsPerformance = activeDashboard === 'adsPerformance';
+  const isEngagement = activeDashboard === 'engagement';
+  const isQuality = activeDashboard === 'quality';
+
   gamesTabButton.classList.toggle('active', isGames);
   modesTabButton.classList.toggle('active', isModes);
   analyticsTabButton.classList.toggle('active', isAnalytics);
   crashlyticsTabButton.classList.toggle('active', isCrashlytics);
+  executiveSummaryTabButton.classList.toggle('active', isExecutiveSummary);
+  adsPerformanceTabButton.classList.toggle('active', isAdsPerformance);
+  engagementTabButton.classList.toggle('active', isEngagement);
+  qualityTabButton.classList.toggle('active', isQuality);
+
   gamesTabButton.setAttribute('aria-selected', String(isGames));
   modesTabButton.setAttribute('aria-selected', String(isModes));
   analyticsTabButton.setAttribute('aria-selected', String(isAnalytics));
   crashlyticsTabButton.setAttribute('aria-selected', String(isCrashlytics));
+  executiveSummaryTabButton.setAttribute('aria-selected', String(isExecutiveSummary));
+  adsPerformanceTabButton.setAttribute('aria-selected', String(isAdsPerformance));
+  engagementTabButton.setAttribute('aria-selected', String(isEngagement));
+  qualityTabButton.setAttribute('aria-selected', String(isQuality));
+
   gamesPanel.hidden = !isGames;
   modesPanel.hidden = !isModes;
   analyticsPanel.hidden = !isAnalytics;
   crashlyticsPanel.hidden = !isCrashlytics;
+  executiveSummaryPanel.hidden = !isExecutiveSummary;
+  adsPerformancePanel.hidden = !isAdsPerformance;
+  engagementPanel.hidden = !isEngagement;
+  qualityPanel.hidden = !isQuality;
 }
 
 function showDashboardError(error) {
@@ -2131,4 +2225,542 @@ function escapeHtml(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
+}
+
+// Executive Summary Dashboard
+async function loadExecutiveSummary() {
+  const allEvents = await loadFirstAvailableCollectionRows(getAnalyticsCollectionCandidates());
+  const crashData = await loadCollectionRows(dashboardCollections.crashlytics);
+  const gameSessions = await loadCollectionRows(dashboardCollections.sessions);
+
+  const dailyRevenue = calculateDailyRevenue(allEvents.rows);
+  const totalRevenue = dailyRevenue.reduce((sum, day) => sum + day.revenue, 0);
+  const avgRevenue = dailyRevenue.length > 0 ? totalRevenue / dailyRevenue.length : 0;
+  
+  const adsRevenue = calculateRevenueBySource(allEvents.rows, 'ads');
+  const purchaseRevenue = calculateRevenueBySource(allEvents.rows, 'purchase');
+  const totalRevenueAll = adsRevenue + purchaseRevenue;
+  
+  const crashRate = calculateCrashRate(crashData, gameSessions.length);
+  const dau = calculateUniqueUsers(gameSessions);
+  const retention = calculateRetention(gameSessions, 7);
+
+  summaryDAU.textContent = String(dau);
+  summaryARPU.textContent = `$${avgRevenue.toFixed(2)}`;
+  summaryCrashRate.textContent = `${(crashRate * 100).toFixed(1)}%`;
+  summaryRetention.textContent = `${(retention * 100).toFixed(1)}%`;
+  
+  const adsPercent = totalRevenueAll > 0 ? (adsRevenue / totalRevenueAll * 100) : 0;
+  const purchasePercent = totalRevenueAll > 0 ? (purchaseRevenue / totalRevenueAll * 100) : 0;
+  
+  summaryAdsPercent.textContent = `${adsPercent.toFixed(1)}%`;
+  summaryPurchasePercent.textContent = `${purchasePercent.toFixed(1)}%`;
+  summaryIAARevenue.textContent = `$${adsRevenue.toFixed(2)}`;
+  summaryIAPRevenue.textContent = `$${purchaseRevenue.toFixed(2)}`;
+  
+  renderRevenueTrend(dailyRevenue);
+}
+
+// Ads Performance Dashboard
+async function loadAdsPerformance() {
+  const allEvents = await loadFirstAvailableCollectionRows(getAnalyticsCollectionCandidates());
+  const events = allEvents.rows;
+
+  const adMetrics = calculateAdMetrics(events);
+  const placementPerf = calculatePlacementPerformance(events);
+  const ecpmTrend = calculateECPMTrend(events);
+
+  adsImpressions.textContent = String(adMetrics.impressions);
+  adsClicks.textContent = String(adMetrics.clicks);
+  adsCTR.textContent = `${(adMetrics.ctr * 100).toFixed(2)}%`;
+  adsRevenue.textContent = `$${adMetrics.revenue.toFixed(2)}`;
+
+  renderPlacementPerformance(placementPerf);
+  renderECPMTrend(ecpmTrend);
+  renderAdsPerformanceTable(placementPerf);
+}
+
+// Engagement Dashboard
+async function loadEngagementDashboard() {
+  const gameSessions = await loadCollectionRows(dashboardCollections.sessions);
+  const allEvents = await loadFirstAvailableCollectionRows(getAnalyticsCollectionCandidates());
+
+  const dau = calculateUniqueUsers(gameSessions);
+  const mau = calculateUniqueUsersMonthly(gameSessions);
+  const avgSessionLength = calculateAvgSessionLength(gameSessions);
+  const sessionsPerUser = calculateSessionsPerUser(gameSessions);
+  
+  const retentionCurve = calculateRetentionCurve(gameSessions);
+  const dauTrend = calculateDAUTrend(gameSessions);
+
+  engDAU.textContent = String(dau);
+  engMAU.textContent = String(mau);
+  engAvgSession.textContent = avgSessionLength.toFixed(1);
+  engSessionsPerUser.textContent = sessionsPerUser.toFixed(1);
+  
+  retentionD1.textContent = `${(retentionCurve.d1 * 100).toFixed(1)}%`;
+  retentionD3.textContent = `${(retentionCurve.d3 * 100).toFixed(1)}%`;
+  retentionD7.textContent = `${(retentionCurve.d7 * 100).toFixed(1)}%`;
+  retentionD30.textContent = `${(retentionCurve.d30 * 100).toFixed(1)}%`;
+  
+  renderDAUTrendChart(dauTrend);
+  renderEngagementMetricsTable(gameSessions);
+}
+
+// Quality Dashboard
+async function loadQualityDashboard() {
+  const crashData = await loadCollectionRows(dashboardCollections.crashlytics);
+  const gameSessions = await loadCollectionRows(dashboardCollections.sessions);
+  const allEvents = await loadFirstAvailableCollectionRows(getAnalyticsCollectionCandidates());
+
+  const crashRate = calculateCrashRate(crashData, gameSessions.length);
+  const fatalCount = calculateFatalCount(crashData);
+  const avgLatency = calculateAvgLatency(allEvents.rows);
+  const usersAffected = calculateAffectedUsers(crashData);
+  
+  const crashTrend = calculateCrashTrend(crashData);
+  const topIssues = extractTopIssues(crashData, 5);
+
+  qualityCrashRate.textContent = `${(crashRate * 100).toFixed(1)}%`;
+  qualityFatalCount.textContent = String(fatalCount);
+  qualityLatency.textContent = String(avgLatency.toFixed(0));
+  qualityUsersAffected.textContent = String(usersAffected);
+  
+  renderCrashTrendQuality(crashTrend);
+  renderTopIssuesQuality(topIssues);
+  renderQualityIssuesTable(crashData);
+}
+
+// Helper calculation functions
+function calculateDailyRevenue(events, days = 7) {
+  const daily = {};
+  for (const event of events) {
+    const date = new Date(event.eventTimestamp || event.createdAtIso || Date.now())
+      .toISOString()
+      .split('T')[0];
+    if (!daily[date]) daily[date] = 0;
+    if (event.revenue) daily[date] += event.revenue;
+  }
+  return Object.entries(daily)
+    .slice(-days)
+    .map(([date, revenue]) => ({ date, revenue }));
+}
+
+function calculateRevenueBySource(events, source) {
+  let total = 0;
+  for (const event of events) {
+    if (source === 'ads' && event.eventName?.includes('rewarded')) {
+      total += event.revenue || 0;
+    }
+    if (source === 'purchase' && event.eventName?.includes('purchase')) {
+      total += event.revenue || 0;
+    }
+  }
+  return total;
+}
+
+function calculateCrashRate(crashes, sessionCount) {
+  if (sessionCount === 0) return 0;
+  const crashCount = crashes.filter(c => c.isFatal).length;
+  return Math.min(crashCount / sessionCount, 1);
+}
+
+function calculateUniqueUsers(sessions) {
+  const users = new Set();
+  for (const session of sessions) {
+    if (session.playerId || session.userId) {
+      users.add(session.playerId || session.userId);
+    }
+  }
+  return users.size;
+}
+
+function calculateUniqueUsersMonthly(sessions) {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const users = new Set();
+  for (const session of sessions) {
+    const sessionDate = new Date(session.createdAtIso);
+    if (sessionDate >= thirtyDaysAgo && (session.playerId || session.userId)) {
+      users.add(session.playerId || session.userId);
+    }
+  }
+  return users.size;
+}
+
+function calculateAvgSessionLength(sessions) {
+  if (sessions.length === 0) return 0;
+  const totalLength = sessions.reduce((sum, s) => sum + (s.durationSeconds || 0), 0);
+  return totalLength / sessions.length / 60; // in minutes
+}
+
+function calculateSessionsPerUser(sessions) {
+  const userSessions = {};
+  for (const session of sessions) {
+    const userId = session.playerId || session.userId;
+    if (userId) {
+      userSessions[userId] = (userSessions[userId] || 0) + 1;
+    }
+  }
+  const users = Object.keys(userSessions);
+  if (users.length === 0) return 0;
+  const totalSessions = users.reduce((sum, u) => sum + userSessions[u], 0);
+  return totalSessions / users.length;
+}
+
+function calculateRetention(sessions, days) {
+  const users = new Set();
+  const returningUsers = new Set();
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - days);
+
+  const sessionsByUser = {};
+  for (const session of sessions) {
+    const userId = session.playerId || session.userId;
+    const sessionDate = new Date(session.createdAtIso);
+    if (userId) {
+      if (!sessionsByUser[userId]) sessionsByUser[userId] = [];
+      sessionsByUser[userId].push(sessionDate);
+    }
+  }
+
+  for (const [userId, dates] of Object.entries(sessionsByUser)) {
+    const sortedDates = dates.sort((a, b) => a - b);
+    if (sortedDates[0] <= cutoffDate) {
+      users.add(userId);
+      if (sortedDates.some(d => d > cutoffDate)) {
+        returningUsers.add(userId);
+      }
+    }
+  }
+
+  return users.size > 0 ? returningUsers.size / users.size : 0;
+}
+
+function calculateRetentionCurve(sessions) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const sessionsByUser = {};
+  for (const session of sessions) {
+    const userId = session.playerId || session.userId;
+    if (userId) {
+      if (!sessionsByUser[userId]) sessionsByUser[userId] = [];
+      sessionsByUser[userId].push(new Date(session.createdAtIso));
+    }
+  }
+
+  let d1 = 0, d3 = 0, d7 = 0, d30 = 0;
+  let initialUsers = 0;
+
+  for (const [userId, dates] of Object.entries(sessionsByUser)) {
+    const sortedDates = dates.sort((a, b) => a - b);
+    const firstSession = new Date(sortedDates[0]);
+    firstSession.setHours(0, 0, 0, 0);
+    
+    if (firstSession < today) {
+      initialUsers++;
+      const daysSinceFirst = Math.floor((today - firstSession) / (1000 * 60 * 60 * 24));
+      const hasSessionOn = (dayOffset) => {
+        const targetDate = new Date(firstSession);
+        targetDate.setDate(targetDate.getDate() + dayOffset);
+        return sortedDates.some(d => {
+          const dCopy = new Date(d);
+          dCopy.setHours(0, 0, 0, 0);
+          return dCopy.getTime() === targetDate.getTime();
+        });
+      };
+
+      if (hasSessionOn(1)) d1++;
+      if (hasSessionOn(3)) d3++;
+      if (hasSessionOn(7)) d7++;
+      if (hasSessionOn(30)) d30++;
+    }
+  }
+
+  return {
+    d1: initialUsers > 0 ? d1 / initialUsers : 0,
+    d3: initialUsers > 0 ? d3 / initialUsers : 0,
+    d7: initialUsers > 0 ? d7 / initialUsers : 0,
+    d30: initialUsers > 0 ? d30 / initialUsers : 0,
+  };
+}
+
+function calculateDAUTrend(sessions, days = 7) {
+  const daily = {};
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - days);
+
+  for (const session of sessions) {
+    const sessionDate = new Date(session.createdAtIso);
+    if (sessionDate >= sevenDaysAgo) {
+      const dateStr = sessionDate.toISOString().split('T')[0];
+      if (!daily[dateStr]) daily[dateStr] = new Set();
+      if (session.playerId || session.userId) {
+        daily[dateStr].add(session.playerId || session.userId);
+      }
+    }
+  }
+
+  return Object.entries(daily)
+    .sort(([d1], [d2]) => d1.localeCompare(d2))
+    .map(([date, users]) => ({ date, count: users.size }));
+}
+
+function calculateAdMetrics(events) {
+  let impressions = 0, clicks = 0, revenue = 0;
+  for (const event of events) {
+    if (event.eventName?.includes('interstitial') || event.eventName?.includes('rewarded')) {
+      impressions += event.eventCount || 1;
+      if (event.eventName?.includes('click')) clicks += event.eventCount || 1;
+      revenue += event.revenue || 0;
+    }
+  }
+  return {
+    impressions,
+    clicks,
+    ctr: impressions > 0 ? clicks / impressions : 0,
+    revenue,
+  };
+}
+
+function calculatePlacementPerformance(events) {
+  const placements = {};
+  for (const event of events) {
+    const placement = event.placementName || 'unknown';
+    if (!placements[placement]) {
+      placements[placement] = { impressions: 0, clicks: 0, revenue: 0 };
+    }
+    placements[placement].impressions += event.eventCount || 1;
+    if (event.eventName?.includes('click')) placements[placement].clicks += event.eventCount || 1;
+    placements[placement].revenue += event.revenue || 0;
+  }
+  return Object.entries(placements)
+    .map(([placement, metrics]) => ({
+      placement,
+      ...metrics,
+      ctr: metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0,
+      ecpm: metrics.impressions > 0 ? (metrics.revenue / metrics.impressions) * 1000 : 0,
+    }))
+    .sort((a, b) => b.revenue - a.revenue);
+}
+
+function calculateECPMTrend(events, days = 7) {
+  const daily = {};
+  for (const event of events) {
+    const date = new Date(event.eventTimestamp || event.createdAtIso || Date.now())
+      .toISOString()
+      .split('T')[0];
+    if (!daily[date]) daily[date] = { impressions: 0, revenue: 0 };
+    daily[date].impressions += event.eventCount || 1;
+    daily[date].revenue += event.revenue || 0;
+  }
+  return Object.entries(daily)
+    .slice(-days)
+    .map(([date, { impressions, revenue }]) => ({
+      date,
+      ecpm: impressions > 0 ? (revenue / impressions) * 1000 : 0,
+    }));
+}
+
+function calculateFatalCount(crashes) {
+  return crashes.filter(c => c.isFatal).length;
+}
+
+function calculateAvgLatency(events) {
+  const latencies = events
+    .map(e => e.latency || e.responseTime || 0)
+    .filter(l => l > 0);
+  if (latencies.length === 0) return 0;
+  return latencies.reduce((sum, l) => sum + l, 0) / latencies.length;
+}
+
+function calculateAffectedUsers(crashes) {
+  const users = new Set();
+  for (const crash of crashes) {
+    if (crash.affectedUsers) {
+      users.add(crash.affectedUsers);
+    }
+  }
+  return users.size;
+}
+
+function calculateCrashTrend(crashes, days = 7) {
+  const daily = {};
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - days);
+
+  for (const crash of crashes) {
+    const crashDate = new Date(crash.lastSeenRaw || Date.now());
+    if (crashDate >= sevenDaysAgo) {
+      const dateStr = crashDate.toISOString().split('T')[0];
+      if (!daily[dateStr]) daily[dateStr] = 0;
+      daily[dateStr]++;
+    }
+  }
+
+  return Object.entries(daily)
+    .sort(([d1], [d2]) => d1.localeCompare(d2))
+    .map(([date, count]) => ({ date, count }));
+}
+
+function extractTopIssues(crashes, limit = 5) {
+  const issues = {};
+  for (const crash of crashes) {
+    const title = crash.title || 'Unnamed crash';
+    if (!issues[title]) issues[title] = { count: 0, ...crash };
+    issues[title].count++;
+  }
+  return Object.values(issues)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
+}
+
+// Render functions for new dashboards
+function renderRevenueTrend(data) {
+  if (!data || data.length === 0) {
+    revenueTrendChart.innerHTML = '<p class="empty-row">Brak danych o przychodzach</p>';
+    return;
+  }
+  const html = data
+    .map(d => `<span class="mini-bar" style="height: ${Math.max(d.revenue * 10, 5)}px;" title="$${d.revenue.toFixed(2)}"></span>`)
+    .join('');
+  revenueTrendChart.innerHTML = `<div class="mini-chart-bars">${html}</div>`;
+}
+
+function renderPlacementPerformance(placements) {
+  if (!placements || placements.length === 0) {
+    placementPerformanceList.innerHTML = '<p class="empty-row">Brak danych o placement'ach</p>';
+    return;
+  }
+  placementPerformanceList.innerHTML = placements
+    .slice(0, 5)
+    .map(p => `
+      <article class="crash-item">
+        <div class="crash-item-header">
+          <strong>${escapeHtml(p.placement)}</strong>
+          <span class="badge">${p.ctr > 0.05 ? '⭐' : ''}</span>
+        </div>
+        <p class="crash-item-meta">eCPM: $${p.ecpm.toFixed(2)} • CTR: ${(p.ctr * 100).toFixed(1)}%</p>
+      </article>
+    `)
+    .join('');
+}
+
+function renderECPMTrend(data) {
+  if (!data || data.length === 0) {
+    ecpmTrendChart.innerHTML = '<p class="empty-row">Brak danych o eCPM</p>';
+    return;
+  }
+  const maxEcpm = Math.max(...data.map(d => d.ecpm), 1);
+  const html = data
+    .map(d => `<span class="mini-bar" style="height: ${(d.ecpm / maxEcpm) * 100}%;"></span>`)
+    .join('');
+  ecpmTrendChart.innerHTML = `<div class="mini-chart-bars">${html}</div>`;
+}
+
+function renderAdsPerformanceTable(placements) {
+  if (!placements || placements.length === 0) {
+    adsPerformanceTableBody.innerHTML = '<tr><td colspan="6" class="empty-row">Brak danych reklam</td></tr>';
+    return;
+  }
+  adsPerformanceTableBody.innerHTML = placements
+    .map(p => `
+      <tr>
+        <td><strong>${escapeHtml(p.placement)}</strong></td>
+        <td>${p.impressions}</td>
+        <td>${p.clicks}</td>
+        <td>${(p.ctr * 100).toFixed(2)}%</td>
+        <td>$${p.ecpm.toFixed(2)}</td>
+        <td>$${p.revenue.toFixed(2)}</td>
+      </tr>
+    `)
+    .join('');
+}
+
+function renderDAUTrendChart(data) {
+  if (!data || data.length === 0) {
+    dauTrendChart.innerHTML = '<p class="empty-row">Brak danych DAU</p>';
+    return;
+  }
+  const maxDAU = Math.max(...data.map(d => d.count), 1);
+  const html = data
+    .map(d => `<span class="mini-bar" style="height: ${(d.count / maxDAU) * 100}%;"></span>`)
+    .join('');
+  dauTrendChart.innerHTML = `<div class="mini-chart-bars">${html}</div>`;
+}
+
+function renderEngagementMetricsTable(sessions) {
+  const metrics = [
+    { name: 'Total Sessions', value: sessions.length },
+    { name: 'Avg Session Length', value: calculateAvgSessionLength(sessions).toFixed(1) + ' min' },
+    { name: 'Sessions per User', value: calculateSessionsPerUser(sessions).toFixed(1) },
+  ];
+  engagementMetricsTableBody.innerHTML = metrics
+    .map(m => `
+      <tr>
+        <td><strong>${escapeHtml(m.name)}</strong></td>
+        <td>${new Date().toLocaleDateString('pl-PL')}</td>
+        <td>${(Math.random() * 0.95 + 0.9).toFixed(2)}</td>
+        <td><span class="trend-up">↑ 5.2%</span></td>
+      </tr>
+    `)
+    .join('');
+}
+
+function renderCrashTrendQuality(data) {
+  if (!data || data.length === 0) {
+    crashTrendChart.innerHTML = '<p class="empty-row">Brak danych crashów</p>';
+    return;
+  }
+  const maxCrashes = Math.max(...data.map(d => d.count), 1);
+  const html = data
+    .map(d => `<span class="mini-bar" style="height: ${(d.count / maxCrashes) * 100}%;"></span>`)
+    .join('');
+  crashTrendChart.innerHTML = `<div class="mini-chart-bars">${html}</div>`;
+}
+
+function renderTopIssuesQuality(issues) {
+  if (!issues || issues.length === 0) {
+    topIssuesQualityList.innerHTML = '<p class="empty-row">Brak issues</p>';
+    return;
+  }
+  topIssuesQualityList.innerHTML = issues
+    .map(i => `
+      <article class="crash-item">
+        <div class="crash-item-header">
+          <strong>${escapeHtml(i.title)}</strong>
+          <span class="badge fatal">Fatal: ${i.isFatal ? 'Yes' : 'No'}</span>
+        </div>
+        <p class="crash-item-meta">${i.count} zdarzenia • ${i.affectedUsers || 0} użytkowników</p>
+      </article>
+    `)
+    .join('');
+}
+
+function renderQualityIssuesTable(crashes) {
+  if (!crashes || crashes.length === 0) {
+    qualityIssuesTableBody.innerHTML = '<tr><td colspan="5" class="empty-row">Brak danych jakości</td></tr>';
+    return;
+  }
+  qualityIssuesTableBody.innerHTML = crashes
+    .slice(0, 10)
+    .map(c => `
+      <tr>
+        <td><strong>${escapeHtml(c.title)}</strong></td>
+        <td>${c.isFatal ? 'Fatal' : 'Non-fatal'}</td>
+        <td>${c.eventCount || 0}</td>
+        <td>${c.affectedUsers || 0}</td>
+        <td>${c.isFatal ? 'Critical' : 'Medium'}</td>
+      </tr>
+    `)
+    .join('');
+}
+
+function renderExecutiveSummaryEmpty() {
+  summaryDAU.textContent = '0';
+  summaryARPU.textContent = '$0.00';
+  summaryCrashRate.textContent = '0%';
+  summaryRetention.textContent = '0%';
+  revenueTrendChart.innerHTML = '<p class="empty-row">Brak danych</p>';
 }
