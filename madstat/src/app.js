@@ -362,8 +362,9 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  const email = (user.email || '').toLowerCase();
-  if (email !== adminAccess.email.toLowerCase()) {
+  const email = normalizeEmailForAuth(user.email);
+  const adminEmail = normalizeEmailForAuth(adminAccess.email);
+  if (email !== adminEmail) {
     setState('unauthorized');
     await signOut(auth);
     return;
@@ -386,6 +387,21 @@ function setState(state) {
   if (state === 'dashboard') {
     updateDashboardVisibility();
   }
+}
+
+function normalizeEmailForAuth(value) {
+  const email = String(value || '').trim().toLowerCase();
+  const atIndex = email.indexOf('@');
+  if (atIndex <= 0) return email;
+
+  const local = email.slice(0, atIndex);
+  const domain = email.slice(atIndex + 1);
+  if (domain !== 'gmail.com' && domain !== 'googlemail.com') {
+    return `${local}@${domain}`;
+  }
+
+  const localNoAlias = local.split('+')[0].replace(/\./g, '');
+  return `${localNoAlias}@gmail.com`;
 }
 
 async function loadDashboard() {
