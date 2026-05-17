@@ -8,7 +8,11 @@
       (function () {
         var normalizedPath = window.location.pathname.replace(/\/+$/, '');
         if (normalizedPath === '/madstat') {
-          window.location.replace('/madstat/index.html' + window.location.search + window.location.hash);
+          var madstatUrl = '/madstat/index.html?v=20260517-5';
+          if (window.location.search) {
+            madstatUrl += '&' + window.location.search.replace(/^\?/, '');
+          }
+          window.location.replace(madstatUrl + window.location.hash);
         }
       })();
     </script>
@@ -36,7 +40,7 @@
   <body>
     <main>
       <h1>Nie znaleziono strony</h1>
-      <p>Jeśli szukasz panelu madstat, przejdź do <a href="/madstat/index.html">/madstat/index.html</a>.</p>
+      <p>Jeśli szukasz panelu madstat, przejdź do <a href="/madstat/index.html?v=20260517-5">/madstat/index.html?v=20260517-5</a>.</p>
     </main>
   </body>
 </html>
