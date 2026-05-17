@@ -1,9 +1,11 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js';
 import {
   getAuth,
+  getRedirectResult,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
 } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js';
 import {
@@ -19,6 +21,7 @@ import {
 
 import { adminAccess, dashboardCollections, firebaseConfig } from './firebase-config.js';
 
+const topBanner = document.getElementById('topBanner');
 const loginCard = document.getElementById('loginCard');
 const unauthorizedCard = document.getElementById('unauthorizedCard');
 const dashboardContent = document.getElementById('dashboardContent');
@@ -233,13 +236,60 @@ crashGroupSortSelect?.addEventListener('change', () => {
 
 restoreCrashGroupPreferences();
 
+// Process result after Google redirect (needed when popup is blocked and redirect flow is used)
+getRedirectResult(auth).catch((error) => {
+  const code = String(error?.code || '').toLowerCase();
+  const msg = String(error?.message || error || 'Logowanie nie powiodło się.');
+  if (code.includes('operation-not-allowed') || msg.toLowerCase().includes('operation-not-allowed')) {
+    loginError.hidden = false;
+    loginError.innerHTML = 'Google sign-in jest wyłączony w Firebase Authentication. Włącz go w Firebase Console → Authentication → Sign-in method.';
+    return;
+  }
+  if (code.includes('unauthorized-domain') || msg.toLowerCase().includes('unauthorized-domain')) {
+    loginError.hidden = false;
+    loginError.innerHTML = 'Domena nieautoryzowana w Firebase Auth. Dodaj domenę do Authorized domains w Firebase Console.';
+    return;
+  }
+  loginError.hidden = false;
+  loginError.textContent = msg;
+});
+
 loginButton.addEventListener('click', async () => {
   loginError.hidden = true;
   try {
     await signInWithPopup(auth, provider);
   } catch (error) {
+    const code = String(error?.code || '').toLowerCase();
+    const msg = String(error?.message || error || 'Logowanie nie powiodło się.');
+
+    // If popup is blocked or closed, fall back to redirect flow
+    if (code.includes('popup-blocked') || code.includes('popup-closed-by-user') || msg.toLowerCase().includes('popup')) {
+      try {
+        await signInWithRedirect(auth, provider);
+        return; // redirect will navigate away
+      } catch (redirError) {
+        loginError.hidden = false;
+        loginError.textContent = redirError?.message || 'Logowanie nie powiodło się (redirect).';
+        return;
+      }
+    }
+
+    // Helpful messages for common Firebase auth issues
+    if (code.includes('unauthorized-domain') || msg.toLowerCase().includes('unauthorized-domain')) {
+      loginError.hidden = false;
+      loginError.innerHTML = 'Domena nieautoryzowana w Firebase Auth. Dodaj <strong>36app.pl</strong> do Authorized domains w Firebase Console.';
+      return;
+    }
+
+    if (code.includes('operation-not-allowed') || msg.toLowerCase().includes('operation-not-allowed')) {
+      loginError.hidden = false;
+      loginError.innerHTML = 'Google sign-in jest wyłączony w Firebase Authentication. Włącz go w Firebase Console → Authentication → Sign-in method.';
+      return;
+    }
+
+    // Generic fallback
     loginError.hidden = false;
-    loginError.textContent = error.message || 'Logowanie nie powiodło się.';
+    loginError.textContent = msg;
   }
 });
 
@@ -274,6 +324,7 @@ function setState(state) {
   dashboardContent.hidden = state !== 'dashboard';
   logoutButton.hidden = state !== 'dashboard';
   refreshButton.disabled = state !== 'dashboard';
+  topBanner.hidden = state !== 'dashboard';
 
   if (state === 'dashboard') {
     updateDashboardVisibility();
