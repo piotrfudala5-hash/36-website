@@ -4,7 +4,6 @@ import {
   getRedirectResult,
   GoogleAuthProvider,
   onAuthStateChanged,
-  signInWithPopup,
   signInWithRedirect,
   signOut,
 } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js';
@@ -187,6 +186,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
+const googleButtonDefaultHtml =
+  loginButton?.innerHTML || 'Zaloguj przez Google';
+let loginInProgress = false;
 
 gamesTabButton.addEventListener('click', async () => {
   await switchDashboard('games');
@@ -236,8 +238,54 @@ crashGroupSortSelect?.addEventListener('change', () => {
 
 restoreCrashGroupPreferences();
 
+function setLoginButtonBusy(isBusy) {
+  if (!loginButton) return;
+  loginButton.disabled = isBusy;
+  loginButton.innerHTML = isBusy
+    ? 'Przekierowanie do Google...'
+    : googleButtonDefaultHtml;
+}
+
+function showAuthError(error) {
+  const code = String(error?.code || '').toLowerCase();
+  const msg = String(error?.message || error || 'Logowanie nie powiodlo sie.');
+
+  if (
+    code.includes('operation-not-allowed') ||
+    msg.toLowerCase().includes('operation-not-allowed')
+  ) {
+    loginError.hidden = false;
+    loginError.innerHTML =
+      'Google sign-in jest wylaczony w Firebase Authentication. Wlacz go w Firebase Console -> Authentication -> Sign-in method.';
+    return;
+  }
+
+  if (
+    code.includes('unauthorized-domain') ||
+    msg.toLowerCase().includes('unauthorized-domain')
+  ) {
+    loginError.hidden = false;
+    loginError.innerHTML =
+      'Domena nieautoryzowana w Firebase Auth. Dodaj <strong>36app.pl</strong> i <strong>www.36app.pl</strong> do Authorized domains.';
+    return;
+  }
+
+  if (code.includes('network-request-failed')) {
+    loginError.hidden = false;
+    loginError.textContent = 'Brak polaczenia z siecia. Sprobuj ponownie.';
+    return;
+  }
+
+  loginError.hidden = false;
+  loginError.textContent = msg;
+}
+
+setLoginButtonBusy(false);
+
 // Process result after Google redirect (needed when popup is blocked and redirect flow is used)
 getRedirectResult(auth).catch((error) => {
+  showAuthError(error);
+  return;
   const code = String(error?.code || '').toLowerCase();
   const msg = String(error?.message || error || 'Logowanie nie powiodło się.');
   if (code.includes('operation-not-allowed') || msg.toLowerCase().includes('operation-not-allowed')) {
@@ -255,10 +303,17 @@ getRedirectResult(auth).catch((error) => {
 });
 
 loginButton.addEventListener('click', async () => {
+  if (loginInProgress) return;
+  loginInProgress = true;
   loginError.hidden = true;
+  setLoginButtonBusy(true);
   try {
-    await signInWithPopup(auth, provider);
+    await signInWithRedirect(auth, provider);
   } catch (error) {
+    loginInProgress = false;
+    setLoginButtonBusy(false);
+    showAuthError(error);
+    return;
     const code = String(error?.code || '').toLowerCase();
     const msg = String(error?.message || error || 'Logowanie nie powiodło się.');
 
@@ -324,7 +379,9 @@ function setState(state) {
   dashboardContent.hidden = state !== 'dashboard';
   logoutButton.hidden = state !== 'dashboard';
   refreshButton.disabled = state !== 'dashboard';
-  topBanner.hidden = state !== 'dashboard';
+  if (topBanner) {
+    topBanner.hidden = state !== 'dashboard';
+  }
 
   if (state === 'dashboard') {
     updateDashboardVisibility();
