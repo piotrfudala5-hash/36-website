@@ -247,13 +247,6 @@ code {
   transform: none;
 }
 
-.login-google-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 4px;
-}
-
 .error-text {
   margin-top: 14px;
   color: var(--danger);

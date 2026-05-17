@@ -126,21 +126,11 @@ if (gallery) {
   const stageImage = gallery.querySelector("[data-gallery-stage]");
   const stageCaption = gallery.querySelector("[data-gallery-caption]");
   const stageZoom = gallery.querySelector("[data-gallery-zoom]");
-  const prevButton = gallery.querySelector("[data-gallery-prev]");
-  const nextButton = gallery.querySelector("[data-gallery-next]");
-  const currentCounter = gallery.querySelector("[data-gallery-current]");
-  const totalCounter = gallery.querySelector("[data-gallery-total]");
-  const progressBar = gallery.querySelector("[data-gallery-progress]");
   const tag = gallery.querySelector("[data-gallery-tag]");
   const title = gallery.querySelector("[data-gallery-title]");
   const summary = gallery.querySelector("[data-gallery-summary]");
   const pointsList = gallery.querySelector("[data-gallery-points]");
   const thumbs = Array.from(gallery.querySelectorAll(".gallery-thumb"));
-  let activeIndex = 0;
-
-  if (totalCounter) {
-    totalCounter.textContent = String(thumbs.length).padStart(2, "0");
-  }
 
   const buildPoints = (value) => {
     if (!pointsList) {
@@ -162,13 +152,6 @@ if (gallery) {
 
   const activateThumb = (thumb, options = {}) => {
     const { focus = false } = options;
-    const nextIndex = thumbs.indexOf(thumb);
-
-    if (nextIndex === -1) {
-      return;
-    }
-
-    activeIndex = nextIndex;
 
     thumbs.forEach((item) => {
       const isActive = item === thumb;
@@ -178,13 +161,8 @@ if (gallery) {
     });
 
     if (stageImage) {
-      stageImage.classList.add("is-switching");
       stageImage.src = thumb.dataset.image || "";
       stageImage.alt = thumb.dataset.alt || "";
-      stageImage.style.objectPosition = thumb.dataset.focus || "top center";
-      window.setTimeout(() => {
-        stageImage.classList.remove("is-switching");
-      }, 90);
     }
 
     if (stageCaption) {
@@ -205,32 +183,9 @@ if (gallery) {
 
     buildPoints(thumb.dataset.points || "");
 
-    if (currentCounter) {
-      currentCounter.textContent = String(activeIndex + 1).padStart(2, "0");
-    }
-
-    if (progressBar && thumbs.length > 0) {
-      progressBar.style.width = `${((activeIndex + 1) / thumbs.length) * 100}%`;
-    }
-
-    thumb.scrollIntoView({
-      behavior: prefersReducedMotion.matches ? "auto" : "smooth",
-      block: "nearest",
-      inline: "center",
-    });
-
     if (focus) {
       thumb.focus();
     }
-  };
-
-  const activateByOffset = (offset, options = {}) => {
-    if (thumbs.length === 0) {
-      return;
-    }
-
-    const nextIndex = (activeIndex + offset + thumbs.length) % thumbs.length;
-    activateThumb(thumbs[nextIndex], options);
   };
 
   const focusThumbByOffset = (currentThumb, offset) => {
@@ -239,9 +194,8 @@ if (gallery) {
       return;
     }
 
-    activateThumb(thumbs[(currentIndex + offset + thumbs.length) % thumbs.length], {
-      focus: true,
-    });
+    const nextIndex = (currentIndex + offset + thumbs.length) % thumbs.length;
+    activateThumb(thumbs[nextIndex], { focus: true });
   };
 
   thumbs.forEach((thumb) => {
@@ -339,30 +293,6 @@ if (contactForm) {
     if (contactStatus) {
       contactStatus.textContent =
         "Otwieram aplikację pocztową z gotową wiadomością. Jeśli nic się nie wydarzy, napisz bezpośrednio na fudi4madcode@gmail.com.";
-    }
-  });
-
-  if (prevButton) {
-    prevButton.addEventListener("click", () => activateByOffset(-1));
-  }
-
-  if (nextButton) {
-    nextButton.addEventListener("click", () => activateByOffset(1));
-  }
-
-  gallery.addEventListener("keydown", (event) => {
-    if (event.target.closest(".gallery-thumb")) {
-      return;
-    }
-
-    if (event.key === "ArrowLeft") {
-      event.preventDefault();
-      activateByOffset(-1);
-    }
-
-    if (event.key === "ArrowRight") {
-      event.preventDefault();
-      activateByOffset(1);
     }
   });
 }
