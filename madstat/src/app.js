@@ -1,10 +1,9 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js';
 import {
   getAuth,
-  getRedirectResult,
   GoogleAuthProvider,
   onAuthStateChanged,
-  signInWithRedirect,
+  signInWithPopup,
   signOut,
 } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js';
 import {
@@ -271,48 +270,25 @@ crashGroupSortSelect?.addEventListener('change', () => {
 
 restoreCrashGroupPreferences();
 
-// After Google redirect: process result and surface any auth errors
-getRedirectResult(auth).then((result) => {
-  if (result) {
-    loginButton.disabled = false;
-    loginButton.textContent = 'Zaloguj przez Google';
-  }
-}).catch((error) => {
-  loginButton.disabled = false;
-  loginButton.innerHTML = _googleButtonHTML;
-  const code = String(error?.code || '').toLowerCase();
-  const msg = String(error?.message || error || 'Logowanie nie powiodło się.');
-  if (code.includes('operation-not-allowed') || msg.toLowerCase().includes('operation-not-allowed')) {
-    loginError.hidden = false;
-    loginError.innerHTML = 'Google sign-in jest wyłączony w Firebase Authentication. Włącz go w Firebase Console → Authentication → Sign-in method.';
-    return;
-  }
-  if (code.includes('unauthorized-domain') || msg.toLowerCase().includes('unauthorized-domain')) {
-    loginError.hidden = false;
-    loginError.innerHTML = 'Domena nieautoryzowana w Firebase Auth. Dodaj <strong>localhost</strong> do Authorized domains w Firebase Console.';
-    return;
-  }
-  loginError.hidden = false;
-  loginError.textContent = msg;
-});
-
 const _googleButtonHTML = loginButton.innerHTML;
 
 loginButton.addEventListener('click', async () => {
   loginError.hidden = true;
   loginButton.disabled = true;
-  loginButton.textContent = 'Przekierowanie do Google…';
+  loginButton.textContent = 'Logowanie przez Google…';
   try {
-    await signInWithRedirect(auth, provider);
-    // page navigates away — no further code runs here
+    await signInWithPopup(auth, provider);
   } catch (error) {
     loginButton.disabled = false;
     loginButton.innerHTML = _googleButtonHTML;
     const code = String(error?.code || '').toLowerCase();
     const msg = String(error?.message || error || 'Logowanie nie powiodło się.');
+    if (code.includes('popup-closed-by-user') || code.includes('cancelled-popup-request')) {
+      return;
+    }
     if (code.includes('unauthorized-domain') || msg.toLowerCase().includes('unauthorized-domain')) {
       loginError.hidden = false;
-      loginError.innerHTML = 'Domena nieautoryzowana w Firebase Auth. Dodaj <strong>localhost</strong> do Authorized domains w Firebase Console.';
+      loginError.innerHTML = 'Domena nieautoryzowana w Firebase Auth. Dodaj domenę do Authorized domains w Firebase Console.';
       return;
     }
     if (code.includes('operation-not-allowed') || msg.toLowerCase().includes('operation-not-allowed')) {
