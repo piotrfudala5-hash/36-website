@@ -1,8 +1,10 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js';
 import {
   getAuth,
+  getRedirectResult,
   GoogleAuthProvider,
   onAuthStateChanged,
+  signInWithRedirect,
   signInWithPopup,
   signOut,
 } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js';
@@ -184,6 +186,14 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
+let loginRequestInFlight = false;
+
+getRedirectResult(auth).catch((error) => {
+  loginError.hidden = false;
+  loginError.textContent = getFriendlyLoginError(error);
+  loginButton.disabled = false;
+  loginRequestInFlight = false;
+});
 
 gamesTabButton.addEventListener('click', async () => {
   await switchDashboard('games');
@@ -257,16 +267,76 @@ function getFriendlyLoginError(error) {
   return message || 'Logowanie nie powiod³o siê.';
 }
 
+function shouldFallbackToRedirect(error) {
+  const code = String(error?.code || '').toLowerCase();
+  const message = String(error?.message || '').toLowerCase();
+  return (
+    code.includes('popup-blocked') ||
+    code.includes('popup-closed-by-user') ||
+    code.includes('cancelled-popup-request') ||
+    code.includes('web-storage-unsupported') ||
+    message.includes('popup') ||
+    message.includes('blocked')
+  );
+}
+
 loginButton.addEventListener('click', async () => {
+  if (loginRequestInFlight) {
+    return;
+  }
+
+  loginRequestInFlight = true;
   loginError.hidden = true;
   loginButton.disabled = true;
+
+  let redirectStarted = false;
+  const fallbackTimer = setTimeout(async () => {
+    if (redirectStarted) {
+      return;
+    }
+
+    redirectStarted = true;
+    loginError.hidden = false;
+    loginError.textContent = 'Popup nie otworzy³ siê. Uruchamiam logowanie przez przekierowanie...';
+
+    try {
+      await signInWithRedirect(auth, provider);
+    } catch (redirectError) {
+      loginError.hidden = false;
+      loginError.textContent = getFriendlyLoginError(redirectError);
+      loginButton.disabled = false;
+      loginRequestInFlight = false;
+      redirectStarted = false;
+    }
+  }, 1800);
+
   try {
     await signInWithPopup(auth, provider);
   } catch (error) {
-    loginError.hidden = false;
-    loginError.textContent = getFriendlyLoginError(error);
+    if (!redirectStarted && shouldFallbackToRedirect(error)) {
+      redirectStarted = true;
+      loginError.hidden = false;
+      loginError.textContent = 'Popup zablokowany. Przekierowujê do logowania Google...';
+      clearTimeout(fallbackTimer);
+
+      try {
+        await signInWithRedirect(auth, provider);
+        return;
+      } catch (redirectError) {
+        loginError.hidden = false;
+        loginError.textContent = getFriendlyLoginError(redirectError);
+      }
+    } else if (!redirectStarted) {
+      loginError.hidden = false;
+      loginError.textContent = getFriendlyLoginError(error);
+    }
   } finally {
-    loginButton.disabled = false;
+    clearTimeout(fallbackTimer);
+
+    if (!redirectStarted) {
+      loginButton.disabled = false;
+      loginRequestInFlight = false;
+    }
   }
 });
 
@@ -2791,3 +2861,4 @@ function renderExecutiveSummaryEmpty() {
   summaryRetention.textContent = '0%';
   revenueTrendChart.innerHTML = '<p class="empty-row">Brak danych</p>';
 }
+
