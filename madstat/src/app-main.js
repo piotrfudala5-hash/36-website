@@ -4,7 +4,6 @@ import {
   getRedirectResult,
   GoogleAuthProvider,
   onAuthStateChanged,
-  signInWithPopup,
   signInWithRedirect,
   signOut,
 } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js';
@@ -186,7 +185,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
-provider.setCustomParameters({ prompt: 'select_account' });
 const googleButtonDefaultHtml =
   loginButton?.innerHTML || 'Zaloguj przez Google';
 let loginInProgress = false;
@@ -299,27 +297,8 @@ loginButton.addEventListener('click', async () => {
   loginError.hidden = true;
   setLoginButtonBusy(true);
   try {
-    await signInWithPopup(auth, provider);
-  } catch (error) {
-    const code = String(error?.code || '').toLowerCase();
-    const msg = String(error?.message || error || '');
-
-    if (
-      code.includes('popup-blocked') ||
-      code.includes('popup-closed-by-user') ||
-      msg.toLowerCase().includes('popup')
-    ) {
-      try {
-        await signInWithRedirect(auth, provider);
-        return;
-      } catch (redirError) {
-        loginInProgress = false;
-        setLoginButtonBusy(false);
-        showAuthError(redirError);
-        return;
-      }
-    }
-
+    await signInWithRedirect(auth, provider);
+    } catch (error) {
     loginInProgress = false;
     setLoginButtonBusy(false);
     showAuthError(error);
