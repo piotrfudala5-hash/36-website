@@ -19,7 +19,20 @@ import {
 
 import { adminAccess, dashboardCollections, firebaseConfig } from './firebase-config.js';
 
+// === DIAGNOSTIC: catch every unhandled error/rejection so nothing is silent ===
+window.addEventListener('error', (e) => {
+  console.error('[FATAL] uncaught error:', e.message, '\nat:', e.filename, e.lineno, '\nfull:', e);
+});
+window.addEventListener('unhandledrejection', (e) => {
+  console.error('[FATAL] unhandled promise rejection:', e.reason);
+});
+console.log('[INIT] app.js module started — Firebase SDK imports OK');
+// =============================================================================
+
 const topBanner = document.getElementById('topBanner');
+const bannerEmail = document.getElementById('bannerEmail');
+const bannerActiveView = document.getElementById('bannerActiveView');
+const bannerLastRefresh = document.getElementById('bannerLastRefresh');
 const loginCard = document.getElementById('loginCard');
 const unauthorizedCard = document.getElementById('unauthorizedCard');
 const dashboardContent = document.getElementById('dashboardContent');
@@ -271,12 +284,17 @@ crashGroupSortSelect?.addEventListener('change', () => {
 restoreCrashGroupPreferences();
 
 loginButton.addEventListener('click', async () => {
+  console.log('[AUTH] login button clicked');
   loginError.hidden = true;
   try {
-    await signInWithPopup(auth, provider);
+    console.log('[AUTH] calling signInWithPopup...');
+    const result = await signInWithPopup(auth, provider);
+    console.log('[AUTH] signInWithPopup succeeded, user:', result.user?.email);
   } catch (error) {
-    const code = String(error?.code || '').toLowerCase();
+    const code = String(error?.code || '');
+    console.error('[AUTH] signInWithPopup error — code:', code, '| message:', error?.message, '| full:', error);
     if (code.includes('popup-closed-by-user') || code.includes('cancelled-popup-request')) {
+      console.log('[AUTH] popup closed by user — silent return');
       return;
     }
     loginError.hidden = false;
@@ -285,6 +303,7 @@ loginButton.addEventListener('click', async () => {
 });
 
 logoutButton.addEventListener('click', async () => {
+  console.log('[AUTH] logout clicked');
   await signOut(auth);
 });
 
@@ -293,23 +312,41 @@ refreshButton.addEventListener('click', async () => {
 });
 
 onAuthStateChanged(auth, async (user) => {
+  console.log('[AUTH] onAuthStateChanged — user:', user ? user.email : 'null');
   if (!user) {
     setState('login');
     return;
   }
 
   const email = (user.email || '').toLowerCase();
+  console.log('[AUTH] checking email:', email, 'vs expected:', adminAccess.email.toLowerCase());
   if (email !== adminAccess.email.toLowerCase()) {
+    console.warn('[AUTH] unauthorized email — signing out');
     setState('unauthorized');
     await signOut(auth);
     return;
   }
 
-  setState('dashboard');
+  console.log('[AUTH] authorized — switching to dashboard');
+  setState('dashboard', user.email);
   await loadDashboard();
 });
 
-function setState(state) {
+const DASHBOARD_LABELS = {
+  games: 'Statystyki gry',
+  modes: 'Tryby gry',
+  analytics: 'Monetyzacja',
+  crashlytics: 'Crashlytics',
+  executiveSummary: 'Podsumowanie',
+  adsPerformance: 'Reklamy',
+  engagement: 'Zaangażowanie',
+  quality: 'Jakość',
+  multiphone: 'Karty Wariata',
+  releases: 'Release Insights',
+};
+
+function setState(state, userEmail) {
+  console.log('[AUTH] setState:', state);
   loginCard.hidden = state !== 'login';
   unauthorizedCard.hidden = state !== 'unauthorized';
   dashboardContent.hidden = state !== 'dashboard';
@@ -318,7 +355,21 @@ function setState(state) {
   if (topBanner) topBanner.hidden = state !== 'dashboard';
 
   if (state === 'dashboard') {
+    if (bannerEmail && userEmail) bannerEmail.textContent = userEmail;
+    updateBannerView();
     updateDashboardVisibility();
+  }
+}
+
+function updateBannerView() {
+  if (bannerActiveView) {
+    bannerActiveView.textContent = DASHBOARD_LABELS[activeDashboard] || activeDashboard;
+  }
+}
+
+function updateBannerRefresh() {
+  if (bannerLastRefresh) {
+    bannerLastRefresh.textContent = new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
 }
 
@@ -352,6 +403,7 @@ async function loadDashboard() {
       await loadCrashlyticsDashboard();
       crashLastRefreshValue.textContent = new Date().toLocaleString('pl-PL');
     }
+    updateBannerRefresh();
   } catch (error) {
     showDashboardError(error);
 
@@ -444,6 +496,8 @@ function updateDashboardVisibility() {
   qualityPanel.hidden = !isQuality;
   multiphonePanel.hidden = !isMultiphone;
   releasesPanel.hidden = !isReleases;
+
+  updateBannerView();
 }
 
 function showDashboardError(error) {
@@ -2768,7 +2822,7 @@ function renderRevenueTrend(data) {
 
 function renderPlacementPerformance(placements) {
   if (!placements || placements.length === 0) {
-    placementPerformanceList.innerHTML = '<p class="empty-row">Brak danych o placement'ach</p>';
+    placementPerformanceList.innerHTML = '<p class="empty-row">Brak danych o placementach</p>';
     return;
   }
   placementPerformanceList.innerHTML = placements

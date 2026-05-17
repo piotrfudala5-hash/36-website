@@ -722,50 +722,99 @@ tbody tr:hover {
   overflow: hidden;
 }
 
-.top-banner::before {
-  content: 'COMMAND CENTER';
-  position: absolute;
-  top: 14px;
-  right: 18px;
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 2.4px;
-  color: var(--accent);
-  opacity: 0.62;
-}
-
-.top-banner-graphic {
-  width: 320px;
-  height: auto;
-  flex: 0 0 320px;
-  border-radius: 12px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
-}
-
-.top-banner-content h2 {
-  margin: 0 0 6px 0;
-  font-size: 20px;
-  color: var(--text-main);
-}
-
-.top-banner-content p {
-  margin: 0 0 12px 0;
-  color: var(--text-soft);
-}
-
-.banner-actions {
+.banner-brand {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 2px;
+  flex: 0 0 auto;
+  padding-right: 32px;
+  border-right: 1px solid rgba(93,103,198,0.18);
 }
 
-.top-banner .primary-button {
-  padding: 10px 16px;
-  border-radius: 12px;
+.banner-eyebrow {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 2.8px;
+  color: var(--accent);
+  opacity: 0.7;
+  text-transform: uppercase;
 }
 
-.top-banner .ghost-button {
-  padding: 10px 14px;
-  border-radius: 12px;
+.banner-app-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(120deg, var(--accent-strong), #5ec7df);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+}
+
+.banner-tagline {
+  font-size: 11px;
+  color: var(--text-soft);
+  font-weight: 500;
+}
+
+.banner-stats {
+  display: flex;
+  gap: 32px;
+  flex: 1;
+  padding: 0 32px;
+}
+
+.banner-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.banner-stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  opacity: 0.8;
+}
+
+.banner-stat-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.banner-pulse {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  margin-left: auto;
+}
+
+.banner-pulse-dot {
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 6px rgba(52,211,153,0.7);
+}
+
+.banner-pulse-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(52,211,153,0.5);
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  70%  { transform: scale(2.2); opacity: 0; }
+  100% { transform: scale(2.2); opacity: 0; }
 }
 
 /* Insights / "Co warto zrobić" panels */

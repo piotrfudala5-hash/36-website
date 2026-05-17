@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>36stopni Admin Dashboard, Monetyzacja i Crashlytics</title>
     <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg?v=20260506-1" />
-    <link rel="stylesheet" href="./src/styles.css?v=20260517-1" />
+    <link rel="stylesheet" href="./src/styles.css?v=20260517-2" />
   </head>
   <body>
     <div class="page-shell">
@@ -23,16 +23,30 @@
         </div>
       </header>
 
-      <!-- Top banner: visually highlights the analytics dashboards — shown only after login -->
-      <div id="topBanner" class="top-banner" role="region" aria-label="Top banner" hidden>
-        <img src="./assets/images/banner.svg" alt="MADStat analytics banner" class="top-banner-graphic"/>
-        <div class="top-banner-content">
-          <h2>Witamy w MADStat</h2>
-          <p>Executive summary, Ads, Engagement i Quality — wszystkie statystyki w jednym miejscu.</p>
-          <div class="banner-actions">
-            <a href="#executiveSummary" class="primary-button">Przejdź do podsumowania</a>
-            <a href="#adsPerformance" class="ghost-button">Zobacz reklamy</a>
+      <!-- Command center banner — shown only after login -->
+      <div id="topBanner" class="top-banner" role="region" aria-label="Command center" hidden>
+        <div class="banner-brand">
+          <span class="banner-eyebrow">COMMAND CENTER</span>
+          <span class="banner-app-name">MADStat</span>
+          <span class="banner-tagline">36stopni analytics</span>
+        </div>
+        <div class="banner-stats">
+          <div class="banner-stat">
+            <span class="banner-stat-label">Zalogowany</span>
+            <span class="banner-stat-value" id="bannerEmail">—</span>
           </div>
+          <div class="banner-stat">
+            <span class="banner-stat-label">Aktywny widok</span>
+            <span class="banner-stat-value" id="bannerActiveView">—</span>
+          </div>
+          <div class="banner-stat">
+            <span class="banner-stat-label">Ostatnie odświeżenie</span>
+            <span class="banner-stat-value" id="bannerLastRefresh">—</span>
+          </div>
+        </div>
+        <div class="banner-pulse" aria-hidden="true">
+          <span class="banner-pulse-dot"></span>
+          <span class="banner-pulse-ring"></span>
         </div>
       </div>
 
@@ -1141,6 +1155,6 @@
       </main>
     </div>
 
-    <script type="module" src="./src/app.js?v=20260517-1"></script>
+    <script type="module" src="./src/app.js?v=20260517-3"></script>
   </body>
 </html>
