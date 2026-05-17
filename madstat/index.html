@@ -880,24 +880,24 @@
           <section id="multiphonePanel" class="dashboard-panel" hidden>
             <div class="stats-grid">
               <article class="stat-card">
-                <p class="stat-label">Sesje multiplayer (7 dni)</p>
+                <p class="stat-label">Sesje KW (30 dni)</p>
                 <strong id="mpSessions7d">0</strong>
-                <span class="stat-hint">Pokoje uruchomione lokalnie + online</span>
+                <span class="stat-hint">kw_session_started + game_history fallback</span>
               </article>
               <article class="stat-card">
                 <p class="stat-label">Średnia liczba graczy</p>
-                <strong id="mpAvgPlayers">0</strong>
-                <span class="stat-hint">Per pokój ostatnich 7 dni</span>
+                <strong id="mpAvgPlayers">—</strong>
+                <span class="stat-hint">Z parametrów eventów lub pól sesji</span>
               </article>
               <article class="stat-card">
-                <p class="stat-label">Ukończone sesje</p>
+                <p class="stat-label">Completion rate</p>
                 <strong id="mpCompletedShare">0%</strong>
-                <span class="stat-hint">% dograne do końca</span>
+                <span class="stat-hint">kw_session_completed / kw_session_started</span>
               </article>
               <article class="stat-card">
                 <p class="stat-label">Crashe KW</p>
                 <strong id="mpCrashCount">0</strong>
-                <span class="stat-hint">Issue z multi-phone w 7 dniach</span>
+                <span class="stat-hint">Issue zawierające kw_/karty_wariata</span>
               </article>
             </div>
 
@@ -984,9 +984,9 @@
           <section id="releasesPanel" class="dashboard-panel" hidden>
             <div class="stats-grid">
               <article class="stat-card">
-                <p class="stat-label">Aktywne wersje</p>
+                <p class="stat-label">Aktywne wersje (30 dni)</p>
                 <strong id="relActiveVersions">0</strong>
-                <span class="stat-hint">Liczba wersji w użyciu (7 dni)</span>
+                <span class="stat-hint">Unikalne appVersion z eventów + crashy</span>
               </article>
               <article class="stat-card stat-card-wide">
                 <p class="stat-label">Top wersja</p>
@@ -996,7 +996,7 @@
               <article class="stat-card">
                 <p class="stat-label">Crashe top wersji</p>
                 <strong id="relTopVersionCrashes">0</strong>
-                <span class="stat-hint">w 7 dniach</span>
+                <span class="stat-hint">w 30 dniach</span>
               </article>
               <article class="stat-card">
                 <p class="stat-label">Wersja z największą regresją</p>

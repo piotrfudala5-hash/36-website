@@ -2944,57 +2944,108 @@ function renderExecutiveSummaryEmpty() {
   revenueTrendChart.innerHTML = '<p class="empty-row">Brak danych</p>';
 }
 
-// ── Multiphone / Karty Wariata Health dashboard ──────────────────────────────
+// ── Karty Wariata Health dashboard ──────────────────────────────────────────
+// Reads from analytics_events (canonical source of kw_* events) + crashlytics
+// reports + game_history (fallback). Tile copy framed as "Karty Wariata" so
+// the panel produces signal even when sessions don't carry a multi-phone tag.
 async function loadMultiphoneDashboard() {
-  const [sessions, crashesRaw, analyticsEvents] = await Promise.all([
-    loadCollectionRows(dashboardCollections.sessions).catch(() => []),
+  const [analyticsRaw, crashesRaw, sessions] = await Promise.all([
+    loadFirstAvailableCollectionRows(getAnalyticsCollectionCandidates())
+      .then((r) => r.rows)
+      .catch(() => []),
     loadCollectionRows(dashboardCollections.crashlytics).catch(() => []),
-    loadCollectionRows(dashboardCollections.analytics).catch(() => []),
+    loadCollectionRows(dashboardCollections.sessions).catch(() => []),
   ]);
 
-  const last7d = filterByDays(sessions, 7, (s) => s.createdAtIso);
-  const mpSessions = last7d.filter(isMultiplayerLike);
+  // ── Source 1: kw_* analytics events (last 30 days) ──────────────────────
+  const recentEvents = filterByDays(
+    analyticsRaw,
+    30,
+    (e) => extractTimestamp(e) || e.createdAtIso || e.timestamp,
+  );
+  const kwEvents = recentEvents.filter((row) => isKwEvent(row));
 
-  mpSessions7d.textContent = String(mpSessions.length);
+  const sessionStarted = kwEvents.filter((e) => eventNameOf(e).startsWith('kw_session_started'));
+  const sessionCompleted = kwEvents.filter((e) => eventNameOf(e).startsWith('kw_session_completed'));
+  const sessionAbandoned = kwEvents.filter((e) => eventNameOf(e).startsWith('kw_session_abandoned'));
+  const roundStarted = kwEvents.filter((e) => eventNameOf(e).startsWith('kw_round_started'));
 
-  // Average players per session — best-effort: count distinct player names per
-  // session row.  game_history rows are 2-player by default, multiplayer rows
-  // expose players[] / playerNames[] / playerCount fields when written by the
-  // multi-phone path.
-  const playerCounts = mpSessions
-    .map((row) => extractPlayerCount(row))
-    .filter((n) => Number.isFinite(n) && n > 0);
-  const avgPlayers = playerCounts.length
-    ? (playerCounts.reduce((a, b) => a + b, 0) / playerCounts.length).toFixed(1)
-    : '0';
+  const totalSessionStarts =
+    sumEventCounts(sessionStarted) || sessionStarted.length;
+  const totalSessionCompletes =
+    sumEventCounts(sessionCompleted) || sessionCompleted.length;
+  const totalSessionAbandons =
+    sumEventCounts(sessionAbandoned) || sessionAbandoned.length;
+  const totalRoundStarts =
+    sumEventCounts(roundStarted) || roundStarted.length;
+
+  // ── Source 2: game_history rows (best-effort signal) ────────────────────
+  const recentSessions = filterByDays(sessions, 30, (s) => s.createdAtIso);
+  const mpLikeSessions = recentSessions.filter(isMultiplayerLike);
+
+  // ── Tile 1: sesje (events + sessions union, prefer events when present)
+  const sessionsTotal = totalSessionStarts || recentSessions.length;
+  mpSessions7d.textContent = String(sessionsTotal);
+
+  // ── Tile 2: średnia liczba graczy — bias to events, fallback to rows
+  let avgPlayers = '—';
+  const eventBasedAvg = avgPlayersFromKwEvents(kwEvents);
+  if (eventBasedAvg > 0) {
+    avgPlayers = eventBasedAvg.toFixed(1);
+  } else if (mpLikeSessions.length > 0) {
+    const counts = mpLikeSessions
+      .map((row) => extractPlayerCount(row))
+      .filter((n) => Number.isFinite(n) && n > 0);
+    avgPlayers = counts.length
+      ? (counts.reduce((a, b) => a + b, 0) / counts.length).toFixed(1)
+      : '—';
+  }
   mpAvgPlayers.textContent = avgPlayers;
 
-  // Completed share — sessions whose status (if present) is "completed" OR
-  // whose finalResult is set (legacy 2-player sessions).
-  const completed = mpSessions.filter(isCompletedRow).length;
-  const completedShare = mpSessions.length
-    ? Math.round((completed / mpSessions.length) * 100)
+  // ── Tile 3: completion share
+  const completionDenominator = totalSessionStarts || sessionsTotal;
+  const completionShare = completionDenominator > 0
+    ? Math.round((totalSessionCompletes / completionDenominator) * 100)
     : 0;
-  mpCompletedShare.textContent = `${completedShare}%`;
+  mpCompletedShare.textContent = `${completionShare}%`;
 
-  // Crashes related to multi-phone in last 7 days
-  const crashes = crashesRaw
-    .flatMap((row) => normalizeCrashRows(row.id, row))
-    .filter((c) => isMultiphoneCrash(c, analyticsEvents));
-  const last7dCrashes = filterByDays(crashes, 7, (c) => c.createdAtIso || c.timestamp);
-  mpCrashCount.textContent = String(last7dCrashes.length);
+  // ── Tile 4: crashes from KW package (broadened heuristic)
+  const allCrashes = crashesRaw.flatMap((row) => normalizeCrashRows(row.id, row));
+  const recentCrashes = filterByDays(
+    allCrashes,
+    30,
+    (c) => c.createdAtIso || c.timestamp || c.lastSeenRaw,
+  );
+  const kwCrashes = recentCrashes.filter((c) => isKwCrash(c));
+  const kwCrashEvents = kwCrashes.reduce(
+    (sum, c) => sum + (toNumber(c.eventCount) || 1),
+    0,
+  );
+  mpCrashCount.textContent = String(kwCrashEvents);
 
-  // Status breakdown
-  const statusBuckets = { lobby: 0, inProgress: 0, completed: 0, abandoned: 0 };
-  for (const row of mpSessions) {
-    const status = String(row.status || row.roomStatus || '').toLowerCase();
-    if (status === 'lobby') statusBuckets.lobby += 1;
-    else if (status === 'inprogress' || status === 'in_progress' || status === 'active') {
-      statusBuckets.inProgress += 1;
-    } else if (status === 'completed' || isCompletedRow(row)) {
-      statusBuckets.completed += 1;
-    } else if (status === 'abandoned' || status === 'closed') {
-      statusBuckets.abandoned += 1;
+  // ── Status buckets — derive from events when sessions lack status field
+  const statusBuckets = {
+    lobby: Math.max(0, totalSessionStarts - totalRoundStarts), // started but no round yet
+    inProgress: Math.max(0, totalRoundStarts - totalSessionCompletes - totalSessionAbandons),
+    completed: totalSessionCompletes,
+    abandoned: totalSessionAbandons,
+  };
+  // If no event data, fall back to status field on sessions
+  if (totalSessionStarts === 0 && mpLikeSessions.length > 0) {
+    statusBuckets.lobby = 0;
+    statusBuckets.inProgress = 0;
+    statusBuckets.completed = 0;
+    statusBuckets.abandoned = 0;
+    for (const row of mpLikeSessions) {
+      const status = String(row.status || row.roomStatus || '').toLowerCase();
+      if (status === 'lobby') statusBuckets.lobby += 1;
+      else if (['inprogress', 'in_progress', 'active'].includes(status)) {
+        statusBuckets.inProgress += 1;
+      } else if (status === 'completed' || isCompletedRow(row)) {
+        statusBuckets.completed += 1;
+      } else if (['abandoned', 'closed'].includes(status)) {
+        statusBuckets.abandoned += 1;
+      }
     }
   }
   mpStatusLobby.textContent = String(statusBuckets.lobby);
@@ -3002,20 +3053,133 @@ async function loadMultiphoneDashboard() {
   mpStatusCompleted.textContent = String(statusBuckets.completed);
   mpStatusAbandoned.textContent = String(statusBuckets.abandoned);
 
-  // Top crashes (multi-phone related)
-  renderMultiphoneTopCrashes(last7dCrashes);
+  renderMultiphoneTopCrashes(kwCrashes);
+  renderMultiphoneRoomsTable(mpLikeSessions.slice(0, 20));
 
-  // Recent rooms table
-  renderMultiphoneRoomsTable(mpSessions.slice(0, 20));
+  renderInsights(
+    mpInsights,
+    buildMultiphoneInsights({
+      sessions: kwEvents.length > 0 ? kwEvents : mpLikeSessions,
+      crashCount: kwCrashEvents,
+      completedShare: completionShare,
+      avgPlayers: eventBasedAvg > 0 ? eventBasedAvg : parseFloat(avgPlayers) || 0,
+      statusBuckets,
+      noEvents: kwEvents.length === 0 && mpLikeSessions.length === 0,
+    }),
+  );
+}
 
-  // Insights
-  renderInsights(mpInsights, buildMultiphoneInsights({
-    sessions: mpSessions,
-    crashCount: last7dCrashes.length,
-    completedShare,
-    avgPlayers: parseFloat(avgPlayers),
-    statusBuckets,
-  }));
+function eventNameOf(row) {
+  return String(row?.eventName || row?.event_name || row?.name || '').toLowerCase();
+}
+
+function isKwEvent(row) {
+  return eventNameOf(row).startsWith('kw_');
+}
+
+function isKwCrash(crash) {
+  const fields = [
+    crash.issueTitle,
+    crash.title,
+    crash.subtitle,
+    crash.summary,
+    crash.message,
+    crash.stackTrace,
+    crash.issueId,
+  ]
+    .filter(Boolean)
+    .map((v) => String(v).toLowerCase())
+    .join(' ');
+  const markers = [
+    'karty_wariata',
+    'kartywariata',
+    'kw_',
+    'multiphone',
+    'multi_phone',
+    'multiplayer',
+    'lobbyscreen',
+    'lobby_screen',
+    'karty wariata',
+  ];
+  return markers.some((m) => fields.includes(m));
+}
+
+function sumEventCounts(rows) {
+  return rows.reduce((sum, row) => {
+    const sources = [row, row?.parameters, row?.params, row?.metadata].filter(Boolean);
+    const n = toNumber(
+      pickValueFromSources(sources, [
+        ['eventCount'],
+        ['event_count'],
+        ['count'],
+        ['events'],
+        ['total'],
+      ]),
+    );
+    return sum + (n > 0 ? n : 1);
+  }, 0);
+}
+
+function avgPlayersFromKwEvents(events) {
+  const samples = [];
+  for (const e of events) {
+    const sources = [e, e?.parameters, e?.params, e?.metadata].filter(Boolean);
+    const n = toNumber(
+      pickValueFromSources(sources, [
+        ['playerCount'],
+        ['player_count'],
+        ['players'],
+        ['playerCountTotal'],
+      ]),
+    );
+    if (n > 0) samples.push(n);
+  }
+  if (samples.length === 0) return 0;
+  return samples.reduce((a, b) => a + b, 0) / samples.length;
+}
+
+function extractTimestamp(row) {
+  if (!row) return '';
+  const sources = [row, row?.parameters, row?.params, row?.metadata].filter(Boolean);
+  return pickValueFromSources(sources, [
+    ['createdAtIso'],
+    ['createdAt'],
+    ['updatedAt'],
+    ['timestamp'],
+    ['eventTimestamp'],
+    ['event', 'timestamp'],
+    ['event', 'time'],
+    ['syncedAt'],
+    ['lastSeen'],
+  ]) || '';
+}
+
+function extractAppVersion(row) {
+  if (!row) return '';
+  const sources = [
+    row,
+    row?.parameters,
+    row?.params,
+    row?.metadata,
+    row?.context,
+    row?.appInfo,
+    row?.app_info,
+    row?.app,
+  ].filter(Boolean);
+  return pickValueFromSources(sources, [
+    ['appVersion'],
+    ['app_version'],
+    ['appVersionName'],
+    ['versionName'],
+    ['version'],
+    ['displayVersion'],
+    ['app', 'version'],
+    ['app', 'displayVersion'],
+    ['app', 'appVersion'],
+    ['appInfo', 'appVersion'],
+    ['appInfo', 'displayVersion'],
+    ['application', 'version'],
+  ]) || '';
 }
 
 function isMultiplayerLike(row) {
@@ -3128,14 +3292,14 @@ function statusBadgeClass(status) {
   return 'pending';
 }
 
-function buildMultiphoneInsights({ sessions, crashCount, completedShare, avgPlayers, statusBuckets }) {
+function buildMultiphoneInsights({ sessions, crashCount, completedShare, avgPlayers, statusBuckets, noEvents }) {
   const hints = [];
-  if (sessions.length === 0) {
+  if (noEvents || (sessions && sessions.length === 0)) {
     hints.push({
       tone: 'info',
-      title: 'Brak danych multi-phone',
+      title: 'Brak eventów Karty Wariata w ostatnich 30 dniach',
       body:
-        'Brak sesji w ostatnich 7 dniach. Sprawdź, czy build z flagą KW_MULTIPHONE_FIREBASE_ENABLED=true jest u testerów.',
+        'Sprawdź czy synchronizacja analytics_events działa (uruchom `uruchom_sync_analytics.bat`). Multi-phone wymaga też flagi KW_MULTIPHONE_FIREBASE_ENABLED=true w buildzie.',
     });
     return hints;
   }
@@ -3188,49 +3352,60 @@ function buildMultiphoneInsights({ sessions, crashCount, completedShare, avgPlay
 }
 
 // ── Release Insights dashboard ────────────────────────────────────────────────
+// 30-day window, robust appVersion extraction (analytics events nest the
+// field under `parameters.app_version` / `appInfo.appVersion` etc.).
 async function loadReleasesDashboard() {
   const [crashesRaw, analyticsEvents, sessions] = await Promise.all([
     loadCollectionRows(dashboardCollections.crashlytics).catch(() => []),
-    loadCollectionRows(dashboardCollections.analytics).catch(() => []),
+    loadFirstAvailableCollectionRows(getAnalyticsCollectionCandidates())
+      .then((r) => r.rows)
+      .catch(() => []),
     loadCollectionRows(dashboardCollections.sessions).catch(() => []),
   ]);
 
   const crashes = crashesRaw.flatMap((row) => normalizeCrashRows(row.id, row));
-  const last7dCrashes = filterByDays(crashes, 7, (c) => c.createdAtIso || c.timestamp);
-  const last7dEvents = filterByDays(analyticsEvents, 7, (e) => e.createdAtIso || e.timestamp);
-  const last7dSessions = filterByDays(sessions, 7, (s) => s.createdAtIso);
+  const recentCrashes = filterByDays(
+    crashes,
+    30,
+    (c) => c.createdAtIso || c.timestamp || c.lastSeenRaw,
+  );
+  const recentEvents = filterByDays(
+    analyticsEvents,
+    30,
+    (e) => extractTimestamp(e),
+  );
+  const recentSessions = filterByDays(sessions, 30, (s) => s.createdAtIso);
 
-  // Group sessions+events by version. Sessions per version come primarily
-  // from analytics_events (which carries appVersion); we also try the
-  // crashlytics rows as a fallback signal.
   const versions = new Map();
 
-  const bumpVersion = (rawVersion, key, lastSeen) => {
+  const bumpVersion = (rawVersion, key, lastSeen, increment) => {
     if (!rawVersion) return;
-    const v = String(rawVersion);
-    if (!v || v === 'undefined') return;
+    const v = String(rawVersion).trim();
+    if (!v || v === 'undefined' || v === 'null') return;
     const entry = versions.get(v) || {
       version: v,
       sessions: 0,
       crashes: 0,
       lastSeen: '',
     };
-    entry[key] = (entry[key] || 0) + 1;
+    entry[key] = (entry[key] || 0) + (increment || 1);
     if (lastSeen && lastSeen > entry.lastSeen) entry.lastSeen = lastSeen;
     versions.set(v, entry);
   };
 
-  for (const e of last7dEvents) {
-    const version = e.appVersion || e.app_version || e.parameters?.app_version;
-    bumpVersion(version, 'sessions', e.createdAtIso || e.timestamp || '');
+  for (const e of recentEvents) {
+    const version = extractAppVersion(e);
+    const ts = extractTimestamp(e);
+    bumpVersion(version, 'sessions', ts, 1);
   }
-  for (const s of last7dSessions) {
-    const version = s.appVersion || s.app_version;
-    bumpVersion(version, 'sessions', s.createdAtIso || '');
+  for (const s of recentSessions) {
+    const version = extractAppVersion(s);
+    bumpVersion(version, 'sessions', s.createdAtIso || '', 1);
   }
-  for (const c of last7dCrashes) {
-    const version = c.appVersion || c.version || c.app_version;
-    bumpVersion(version, 'crashes', c.createdAtIso || c.timestamp || '');
+  for (const c of recentCrashes) {
+    const ts = c.createdAtIso || c.timestamp || c.lastSeenRaw || '';
+    const eventCount = toNumber(c.eventCount) || 1;
+    bumpVersion(c.appVersion, 'crashes', ts, eventCount);
   }
 
   const versionList = [...versions.values()].sort((a, b) => b.sessions - a.sessions);
