@@ -20,7 +20,6 @@ import {
 
 import { adminAccess, dashboardCollections, firebaseConfig } from './firebase-config.js';
 
-const topBanner = document.getElementById('topBanner');
 const loginCard = document.getElementById('loginCard');
 const unauthorizedCard = document.getElementById('unauthorizedCard');
 const dashboardContent = document.getElementById('dashboardContent');
@@ -282,25 +281,15 @@ function showAuthError(error) {
 
 setLoginButtonBusy(false);
 
-// Process result after Google redirect (needed when popup is blocked and redirect flow is used)
-getRedirectResult(auth).catch((error) => {
-  showAuthError(error);
-  return;
-  const code = String(error?.code || '').toLowerCase();
-  const msg = String(error?.message || error || 'Logowanie nie powiodło się.');
-  if (code.includes('operation-not-allowed') || msg.toLowerCase().includes('operation-not-allowed')) {
-    loginError.hidden = false;
-    loginError.innerHTML = 'Google sign-in jest wyłączony w Firebase Authentication. Włącz go w Firebase Console → Authentication → Sign-in method.';
-    return;
-  }
-  if (code.includes('unauthorized-domain') || msg.toLowerCase().includes('unauthorized-domain')) {
-    loginError.hidden = false;
-    loginError.innerHTML = 'Domena nieautoryzowana w Firebase Auth. Dodaj domenę do Authorized domains w Firebase Console.';
-    return;
-  }
-  loginError.hidden = false;
-  loginError.textContent = msg;
-});
+// Process result after Google redirect (required for redirect login flow).
+getRedirectResult(auth)
+  .catch((error) => {
+    showAuthError(error);
+  })
+  .finally(() => {
+    loginInProgress = false;
+    setLoginButtonBusy(false);
+  });
 
 loginButton.addEventListener('click', async () => {
   if (loginInProgress) return;
@@ -309,42 +298,11 @@ loginButton.addEventListener('click', async () => {
   setLoginButtonBusy(true);
   try {
     await signInWithRedirect(auth, provider);
-  } catch (error) {
+    } catch (error) {
     loginInProgress = false;
     setLoginButtonBusy(false);
     showAuthError(error);
     return;
-    const code = String(error?.code || '').toLowerCase();
-    const msg = String(error?.message || error || 'Logowanie nie powiodło się.');
-
-    // If popup is blocked or closed, fall back to redirect flow
-    if (code.includes('popup-blocked') || code.includes('popup-closed-by-user') || msg.toLowerCase().includes('popup')) {
-      try {
-        await signInWithRedirect(auth, provider);
-        return; // redirect will navigate away
-      } catch (redirError) {
-        loginError.hidden = false;
-        loginError.textContent = redirError?.message || 'Logowanie nie powiodło się (redirect).';
-        return;
-      }
-    }
-
-    // Helpful messages for common Firebase auth issues
-    if (code.includes('unauthorized-domain') || msg.toLowerCase().includes('unauthorized-domain')) {
-      loginError.hidden = false;
-      loginError.innerHTML = 'Domena nieautoryzowana w Firebase Auth. Dodaj <strong>36app.pl</strong> do Authorized domains w Firebase Console.';
-      return;
-    }
-
-    if (code.includes('operation-not-allowed') || msg.toLowerCase().includes('operation-not-allowed')) {
-      loginError.hidden = false;
-      loginError.innerHTML = 'Google sign-in jest wyłączony w Firebase Authentication. Włącz go w Firebase Console → Authentication → Sign-in method.';
-      return;
-    }
-
-    // Generic fallback
-    loginError.hidden = false;
-    loginError.textContent = msg;
   }
 });
 
@@ -365,8 +323,15 @@ onAuthStateChanged(auth, async (user) => {
   const email = normalizeEmailForAuth(user.email);
   const adminEmail = normalizeEmailForAuth(adminAccess.email);
   if (email !== adminEmail) {
-    setState('unauthorized');
     await signOut(auth);
+    setState('login');
+    loginError.hidden = false;
+    loginError.innerHTML =
+      'To konto nie ma dostepu do panelu. Zalogowano jako <strong>' +
+      escapeHtml(user.email || '') +
+      '</strong>, wymagane konto: <strong>' +
+      escapeHtml(adminAccess.email) +
+      '</strong>.';
     return;
   }
 
@@ -380,10 +345,6 @@ function setState(state) {
   dashboardContent.hidden = state !== 'dashboard';
   logoutButton.hidden = state !== 'dashboard';
   refreshButton.disabled = state !== 'dashboard';
-  if (topBanner) {
-    topBanner.hidden = state !== 'dashboard';
-  }
-
   if (state === 'dashboard') {
     updateDashboardVisibility();
   }
