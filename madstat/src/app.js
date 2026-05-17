@@ -315,7 +315,7 @@ function setState(state) {
   dashboardContent.hidden = state !== 'dashboard';
   logoutButton.hidden = state !== 'dashboard';
   refreshButton.disabled = state !== 'dashboard';
-  topBanner.hidden = state !== 'dashboard';
+  if (topBanner) topBanner.hidden = state !== 'dashboard';
 
   if (state === 'dashboard') {
     updateDashboardVisibility();
