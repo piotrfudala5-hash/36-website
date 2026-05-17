@@ -270,34 +270,17 @@ crashGroupSortSelect?.addEventListener('change', () => {
 
 restoreCrashGroupPreferences();
 
-const _googleButtonHTML = loginButton.innerHTML;
-
 loginButton.addEventListener('click', async () => {
   loginError.hidden = true;
-  loginButton.disabled = true;
-  loginButton.textContent = 'Logowanie przez Google…';
   try {
     await signInWithPopup(auth, provider);
   } catch (error) {
-    loginButton.disabled = false;
-    loginButton.innerHTML = _googleButtonHTML;
     const code = String(error?.code || '').toLowerCase();
-    const msg = String(error?.message || error || 'Logowanie nie powiodło się.');
     if (code.includes('popup-closed-by-user') || code.includes('cancelled-popup-request')) {
       return;
     }
-    if (code.includes('unauthorized-domain') || msg.toLowerCase().includes('unauthorized-domain')) {
-      loginError.hidden = false;
-      loginError.innerHTML = 'Domena nieautoryzowana w Firebase Auth. Dodaj domenę do Authorized domains w Firebase Console.';
-      return;
-    }
-    if (code.includes('operation-not-allowed') || msg.toLowerCase().includes('operation-not-allowed')) {
-      loginError.hidden = false;
-      loginError.innerHTML = 'Google sign-in jest wyłączony w Firebase Authentication. Włącz go w Firebase Console → Authentication → Sign-in method.';
-      return;
-    }
     loginError.hidden = false;
-    loginError.textContent = msg;
+    loginError.textContent = error.message || 'Logowanie nie powiodło się.';
   }
 });
 
