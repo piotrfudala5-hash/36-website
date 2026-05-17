@@ -694,53 +694,6 @@ tbody tr:hover {
   font-size: 13px;
 }
 
-/* Top banner styles */
-.top-banner {
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  padding: 18px;
-  border-radius: 18px;
-  margin: 18px 0;
-  background: linear-gradient(90deg, rgba(123,97,255,0.14), rgba(94,231,223,0.12));
-  border: 1px solid rgba(93,103,198,0.08);
-  box-shadow: 0 10px 22px rgba(72,87,191,0.06);
-}
-
-.top-banner-graphic {
-  width: 320px;
-  height: auto;
-  flex: 0 0 320px;
-  border-radius: 12px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
-}
-
-.top-banner-content h2 {
-  margin: 0 0 6px 0;
-  font-size: 20px;
-  color: var(--text-main);
-}
-
-.top-banner-content p {
-  margin: 0 0 12px 0;
-  color: var(--text-soft);
-}
-
-.banner-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.top-banner .primary-button {
-  padding: 10px 16px;
-  border-radius: 12px;
-}
-
-.top-banner .ghost-button {
-  padding: 10px 14px;
-  border-radius: 12px;
-}
-
 @media (max-width: 960px) {
   .dashboard-rail,
   .stats-grid,

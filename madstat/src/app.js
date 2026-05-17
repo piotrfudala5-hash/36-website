@@ -233,13 +233,40 @@ crashGroupSortSelect?.addEventListener('change', () => {
 
 restoreCrashGroupPreferences();
 
+function getFriendlyLoginError(error) {
+  const code = String(error?.code || '').toLowerCase();
+  const message = String(error?.message || '');
+  const lowerMessage = message.toLowerCase();
+
+  if (code.includes('popup-blocked') || lowerMessage.includes('popup blocked')) {
+    return 'Przegl¹darka zablokowa³a okno logowania Google. Zezwól na popupy dla tej strony.';
+  }
+
+  if (code.includes('popup-closed-by-user')) {
+    return 'Okno logowania zosta³o zamkniête przed zakoñczeniem. Spróbuj ponownie.';
+  }
+
+  if (code.includes('unauthorized-domain') || lowerMessage.includes('unauthorized-domain')) {
+    return 'Domena nieautoryzowana w Firebase Auth. Dodaj domenê strony do Authorized domains.';
+  }
+
+  if (code.includes('operation-not-allowed') || lowerMessage.includes('operation-not-allowed')) {
+    return 'Google Sign-In jest wy³¹czony w Firebase Authentication. W³¹cz metodê logowania Google.';
+  }
+
+  return message || 'Logowanie nie powiod³o siê.';
+}
+
 loginButton.addEventListener('click', async () => {
   loginError.hidden = true;
+  loginButton.disabled = true;
   try {
     await signInWithPopup(auth, provider);
   } catch (error) {
     loginError.hidden = false;
-    loginError.textContent = error.message || 'Logowanie nie powiodÅ‚o siÄ™.';
+    loginError.textContent = getFriendlyLoginError(error);
+  } finally {
+    loginButton.disabled = false;
   }
 });
 
