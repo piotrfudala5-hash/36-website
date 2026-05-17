@@ -1,9 +1,10 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js';
 import {
   getAuth,
+  getRedirectResult,
   GoogleAuthProvider,
   onAuthStateChanged,
-  signInWithPopup,
+  signInWithRedirect,
   signOut,
 } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js';
 import {
@@ -19,6 +20,7 @@ import {
 
 import { adminAccess, dashboardCollections, firebaseConfig } from './firebase-config.js';
 
+const topBanner = document.getElementById('topBanner');
 const loginCard = document.getElementById('loginCard');
 const unauthorizedCard = document.getElementById('unauthorizedCard');
 const dashboardContent = document.getElementById('dashboardContent');
@@ -34,10 +36,46 @@ const gamesTabButton = document.getElementById('gamesTabButton');
 const crashlyticsTabButton = document.getElementById('crashlyticsTabButton');
 const modesTabButton = document.getElementById('modesTabButton');
 const analyticsTabButton = document.getElementById('analyticsTabButton');
+const executiveSummaryTabButton = document.getElementById('executiveSummaryTabButton');
+const adsPerformanceTabButton = document.getElementById('adsPerformanceTabButton');
+const engagementTabButton = document.getElementById('engagementTabButton');
+const qualityTabButton = document.getElementById('qualityTabButton');
+const multiphoneTabButton = document.getElementById('multiphoneTabButton');
+const releasesTabButton = document.getElementById('releasesTabButton');
 const gamesPanel = document.getElementById('gamesPanel');
 const crashlyticsPanel = document.getElementById('crashlyticsPanel');
 const modesPanel = document.getElementById('modesPanel');
 const analyticsPanel = document.getElementById('analyticsPanel');
+const executiveSummaryPanel = document.getElementById('executiveSummaryPanel');
+const adsPerformancePanel = document.getElementById('adsPerformancePanel');
+const engagementPanel = document.getElementById('engagementPanel');
+const qualityPanel = document.getElementById('qualityPanel');
+const multiphonePanel = document.getElementById('multiphonePanel');
+const releasesPanel = document.getElementById('releasesPanel');
+
+// Multiphone (Karty Wariata) elements
+const mpSessions7d = document.getElementById('mpSessions7d');
+const mpAvgPlayers = document.getElementById('mpAvgPlayers');
+const mpCompletedShare = document.getElementById('mpCompletedShare');
+const mpCrashCount = document.getElementById('mpCrashCount');
+const mpStatusLobby = document.getElementById('mpStatusLobby');
+const mpStatusInProgress = document.getElementById('mpStatusInProgress');
+const mpStatusCompleted = document.getElementById('mpStatusCompleted');
+const mpStatusAbandoned = document.getElementById('mpStatusAbandoned');
+const mpTopCrashList = document.getElementById('mpTopCrashList');
+const mpRoomsTableBody = document.getElementById('mpRoomsTableBody');
+const mpInsights = document.getElementById('mpInsights');
+
+// Release Insights elements
+const relActiveVersions = document.getElementById('relActiveVersions');
+const relTopVersion = document.getElementById('relTopVersion');
+const relTopVersionShare = document.getElementById('relTopVersionShare');
+const relTopVersionCrashes = document.getElementById('relTopVersionCrashes');
+const relRegressionVersion = document.getElementById('relRegressionVersion');
+const relAdoptionList = document.getElementById('relAdoptionList');
+const relQualityChart = document.getElementById('relQualityChart');
+const relVersionsTableBody = document.getElementById('relVersionsTableBody');
+const relInsights = document.getElementById('relInsights');
 const adminEmailValue = document.getElementById('adminEmailValue');
 const lastRefreshValue = document.getElementById('lastRefreshValue');
 const docsCountValue = document.getElementById('docsCountValue');
@@ -109,13 +147,54 @@ const latestCrashValue = document.getElementById('latestCrashValue');
 const latestCrashVersionValue = document.getElementById('latestCrashVersionValue');
 const crashTableBody = document.getElementById('crashTableBody');
 
+// Executive Summary elements
+const summaryDAU = document.getElementById('summaryDAU');
+const summaryARPU = document.getElementById('summaryARPU');
+const summaryCrashRate = document.getElementById('summaryCrashRate');
+const summaryRetention = document.getElementById('summaryRetention');
+const revenueTrendChart = document.getElementById('revenueTrendChart');
+const summaryAdsPercent = document.getElementById('summaryAdsPercent');
+const summaryPurchasePercent = document.getElementById('summaryPurchasePercent');
+const summaryIAARevenue = document.getElementById('summaryIAARevenue');
+const summaryIAPRevenue = document.getElementById('summaryIAPRevenue');
+
+// Ads Performance elements
+const adsImpressions = document.getElementById('adsImpressions');
+const adsClicks = document.getElementById('adsClicks');
+const adsCTR = document.getElementById('adsCTR');
+const adsRevenue = document.getElementById('adsRevenue');
+const placementPerformanceList = document.getElementById('placementPerformanceList');
+const ecpmTrendChart = document.getElementById('ecpmTrendChart');
+const adsPerformanceTableBody = document.getElementById('adsPerformanceTableBody');
+
+// Engagement elements
+const engDAU = document.getElementById('engDAU');
+const engMAU = document.getElementById('engMAU');
+const engAvgSession = document.getElementById('engAvgSession');
+const engSessionsPerUser = document.getElementById('engSessionsPerUser');
+const retentionD1 = document.getElementById('retentionD1');
+const retentionD3 = document.getElementById('retentionD3');
+const retentionD7 = document.getElementById('retentionD7');
+const retentionD30 = document.getElementById('retentionD30');
+const dauTrendChart = document.getElementById('dauTrendChart');
+const engagementMetricsTableBody = document.getElementById('engagementMetricsTableBody');
+
+// Quality elements
+const qualityCrashRate = document.getElementById('qualityCrashRate');
+const qualityFatalCount = document.getElementById('qualityFatalCount');
+const qualityLatency = document.getElementById('qualityLatency');
+const qualityUsersAffected = document.getElementById('qualityUsersAffected');
+const crashTrendChart = document.getElementById('crashTrendChart');
+const topIssuesQualityList = document.getElementById('topIssuesQualityList');
+const qualityIssuesTableBody = document.getElementById('qualityIssuesTableBody');
+
 const DASHBOARD_STORAGE_KEYS = {
   activeDashboard: 'statapp.activeDashboard',
   crashGroupBy: 'statapp.crashGroupBy',
   crashGroupSort: 'statapp.crashGroupSort',
 };
 
-const ALLOWED_DASHBOARDS = new Set(['games', 'modes', 'analytics', 'crashlytics']);
+const ALLOWED_DASHBOARDS = new Set(['games', 'modes', 'analytics', 'crashlytics', 'executiveSummary', 'adsPerformance', 'engagement', 'quality', 'multiphone', 'releases']);
 
 let activeDashboard = restoreActiveDashboard();
 let crashRowsCache = [];
@@ -152,6 +231,30 @@ analyticsTabButton.addEventListener('click', async () => {
   await switchDashboard('analytics');
 });
 
+executiveSummaryTabButton.addEventListener('click', async () => {
+  await switchDashboard('executiveSummary');
+});
+
+adsPerformanceTabButton.addEventListener('click', async () => {
+  await switchDashboard('adsPerformance');
+});
+
+engagementTabButton.addEventListener('click', async () => {
+  await switchDashboard('engagement');
+});
+
+qualityTabButton.addEventListener('click', async () => {
+  await switchDashboard('quality');
+});
+
+multiphoneTabButton.addEventListener('click', async () => {
+  await switchDashboard('multiphone');
+});
+
+releasesTabButton.addEventListener('click', async () => {
+  await switchDashboard('releases');
+});
+
 crashGroupBySelect?.addEventListener('change', () => {
   savePreference(DASHBOARD_STORAGE_KEYS.crashGroupBy, crashGroupBySelect.value);
   if (activeDashboard === 'crashlytics') {
@@ -168,13 +271,57 @@ crashGroupSortSelect?.addEventListener('change', () => {
 
 restoreCrashGroupPreferences();
 
+// After Google redirect: process result and surface any auth errors
+getRedirectResult(auth).then((result) => {
+  if (result) {
+    loginButton.disabled = false;
+    loginButton.textContent = 'Zaloguj przez Google';
+  }
+}).catch((error) => {
+  loginButton.disabled = false;
+  loginButton.innerHTML = _googleButtonHTML;
+  const code = String(error?.code || '').toLowerCase();
+  const msg = String(error?.message || error || 'Logowanie nie powiodło się.');
+  if (code.includes('operation-not-allowed') || msg.toLowerCase().includes('operation-not-allowed')) {
+    loginError.hidden = false;
+    loginError.innerHTML = 'Google sign-in jest wyłączony w Firebase Authentication. Włącz go w Firebase Console → Authentication → Sign-in method.';
+    return;
+  }
+  if (code.includes('unauthorized-domain') || msg.toLowerCase().includes('unauthorized-domain')) {
+    loginError.hidden = false;
+    loginError.innerHTML = 'Domena nieautoryzowana w Firebase Auth. Dodaj <strong>localhost</strong> do Authorized domains w Firebase Console.';
+    return;
+  }
+  loginError.hidden = false;
+  loginError.textContent = msg;
+});
+
+const _googleButtonHTML = loginButton.innerHTML;
+
 loginButton.addEventListener('click', async () => {
   loginError.hidden = true;
+  loginButton.disabled = true;
+  loginButton.textContent = 'Przekierowanie do Google…';
   try {
-    await signInWithPopup(auth, provider);
+    await signInWithRedirect(auth, provider);
+    // page navigates away — no further code runs here
   } catch (error) {
+    loginButton.disabled = false;
+    loginButton.innerHTML = _googleButtonHTML;
+    const code = String(error?.code || '').toLowerCase();
+    const msg = String(error?.message || error || 'Logowanie nie powiodło się.');
+    if (code.includes('unauthorized-domain') || msg.toLowerCase().includes('unauthorized-domain')) {
+      loginError.hidden = false;
+      loginError.innerHTML = 'Domena nieautoryzowana w Firebase Auth. Dodaj <strong>localhost</strong> do Authorized domains w Firebase Console.';
+      return;
+    }
+    if (code.includes('operation-not-allowed') || msg.toLowerCase().includes('operation-not-allowed')) {
+      loginError.hidden = false;
+      loginError.innerHTML = 'Google sign-in jest wyłączony w Firebase Authentication. Włącz go w Firebase Console → Authentication → Sign-in method.';
+      return;
+    }
     loginError.hidden = false;
-    loginError.textContent = error.message || 'Logowanie nie powiodło się.';
+    loginError.textContent = msg;
   }
 });
 
@@ -209,6 +356,7 @@ function setState(state) {
   dashboardContent.hidden = state !== 'dashboard';
   logoutButton.hidden = state !== 'dashboard';
   refreshButton.disabled = state !== 'dashboard';
+  topBanner.hidden = state !== 'dashboard';
 
   if (state === 'dashboard') {
     updateDashboardVisibility();
@@ -229,6 +377,18 @@ async function loadDashboard() {
     } else if (activeDashboard === 'analytics') {
       await loadAnalyticsDashboard();
       analyticsLastRefreshValue.textContent = new Date().toLocaleString('pl-PL');
+    } else if (activeDashboard === 'executiveSummary') {
+      await loadExecutiveSummary();
+    } else if (activeDashboard === 'adsPerformance') {
+      await loadAdsPerformance();
+    } else if (activeDashboard === 'engagement') {
+      await loadEngagementDashboard();
+    } else if (activeDashboard === 'quality') {
+      await loadQualityDashboard();
+    } else if (activeDashboard === 'multiphone') {
+      await loadMultiphoneDashboard();
+    } else if (activeDashboard === 'releases') {
+      await loadReleasesDashboard();
     } else {
       await loadCrashlyticsDashboard();
       crashLastRefreshValue.textContent = new Date().toLocaleString('pl-PL');
@@ -255,10 +415,12 @@ async function loadDashboard() {
         analyticsModeDocs: 0,
       });
       modesDocsCountValue.textContent = '0';
-    } else {
+    } else if (activeDashboard === 'games') {
       renderStats([]);
       renderTable([]);
       docsCountValue.textContent = '0';
+    } else {
+      renderExecutiveSummaryEmpty();
     }
   } finally {
     refreshButton.disabled = false;
@@ -284,18 +446,45 @@ function updateDashboardVisibility() {
   const isModes = activeDashboard === 'modes';
   const isAnalytics = activeDashboard === 'analytics';
   const isCrashlytics = activeDashboard === 'crashlytics';
+  const isExecutiveSummary = activeDashboard === 'executiveSummary';
+  const isAdsPerformance = activeDashboard === 'adsPerformance';
+  const isEngagement = activeDashboard === 'engagement';
+  const isQuality = activeDashboard === 'quality';
+  const isMultiphone = activeDashboard === 'multiphone';
+  const isReleases = activeDashboard === 'releases';
+
   gamesTabButton.classList.toggle('active', isGames);
   modesTabButton.classList.toggle('active', isModes);
   analyticsTabButton.classList.toggle('active', isAnalytics);
   crashlyticsTabButton.classList.toggle('active', isCrashlytics);
+  executiveSummaryTabButton.classList.toggle('active', isExecutiveSummary);
+  adsPerformanceTabButton.classList.toggle('active', isAdsPerformance);
+  engagementTabButton.classList.toggle('active', isEngagement);
+  qualityTabButton.classList.toggle('active', isQuality);
+  multiphoneTabButton.classList.toggle('active', isMultiphone);
+  releasesTabButton.classList.toggle('active', isReleases);
+
   gamesTabButton.setAttribute('aria-selected', String(isGames));
   modesTabButton.setAttribute('aria-selected', String(isModes));
   analyticsTabButton.setAttribute('aria-selected', String(isAnalytics));
   crashlyticsTabButton.setAttribute('aria-selected', String(isCrashlytics));
+  executiveSummaryTabButton.setAttribute('aria-selected', String(isExecutiveSummary));
+  adsPerformanceTabButton.setAttribute('aria-selected', String(isAdsPerformance));
+  engagementTabButton.setAttribute('aria-selected', String(isEngagement));
+  qualityTabButton.setAttribute('aria-selected', String(isQuality));
+  multiphoneTabButton.setAttribute('aria-selected', String(isMultiphone));
+  releasesTabButton.setAttribute('aria-selected', String(isReleases));
+
   gamesPanel.hidden = !isGames;
   modesPanel.hidden = !isModes;
   analyticsPanel.hidden = !isAnalytics;
   crashlyticsPanel.hidden = !isCrashlytics;
+  executiveSummaryPanel.hidden = !isExecutiveSummary;
+  adsPerformancePanel.hidden = !isAdsPerformance;
+  engagementPanel.hidden = !isEngagement;
+  qualityPanel.hidden = !isQuality;
+  multiphonePanel.hidden = !isMultiphone;
+  releasesPanel.hidden = !isReleases;
 }
 
 function showDashboardError(error) {
@@ -2131,4 +2320,1098 @@ function escapeHtml(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
+}
+
+// Executive Summary Dashboard
+async function loadExecutiveSummary() {
+  const allEvents = await loadFirstAvailableCollectionRows(getAnalyticsCollectionCandidates());
+  const crashData = await loadCollectionRows(dashboardCollections.crashlytics);
+  const gameSessions = await loadCollectionRows(dashboardCollections.sessions);
+
+  const dailyRevenue = calculateDailyRevenue(allEvents.rows);
+  const totalRevenue = dailyRevenue.reduce((sum, day) => sum + day.revenue, 0);
+  const avgRevenue = dailyRevenue.length > 0 ? totalRevenue / dailyRevenue.length : 0;
+  
+  const adsRevenue = calculateRevenueBySource(allEvents.rows, 'ads');
+  const purchaseRevenue = calculateRevenueBySource(allEvents.rows, 'purchase');
+  const totalRevenueAll = adsRevenue + purchaseRevenue;
+  
+  const crashRate = calculateCrashRate(crashData, gameSessions.length);
+  const dau = calculateUniqueUsers(gameSessions);
+  const retention = calculateRetention(gameSessions, 7);
+
+  summaryDAU.textContent = String(dau);
+  summaryARPU.textContent = `$${avgRevenue.toFixed(2)}`;
+  summaryCrashRate.textContent = `${(crashRate * 100).toFixed(1)}%`;
+  summaryRetention.textContent = `${(retention * 100).toFixed(1)}%`;
+  
+  const adsPercent = totalRevenueAll > 0 ? (adsRevenue / totalRevenueAll * 100) : 0;
+  const purchasePercent = totalRevenueAll > 0 ? (purchaseRevenue / totalRevenueAll * 100) : 0;
+  
+  summaryAdsPercent.textContent = `${adsPercent.toFixed(1)}%`;
+  summaryPurchasePercent.textContent = `${purchasePercent.toFixed(1)}%`;
+  summaryIAARevenue.textContent = `$${adsRevenue.toFixed(2)}`;
+  summaryIAPRevenue.textContent = `$${purchaseRevenue.toFixed(2)}`;
+
+  renderRevenueTrend(dailyRevenue);
+
+  const summaryInsightsTarget = document.getElementById('summaryInsights');
+  if (summaryInsightsTarget) {
+    renderInsights(
+      summaryInsightsTarget,
+      buildExecutiveSummaryInsights({
+        dau,
+        avgRevenue,
+        adsPercent,
+        purchasePercent,
+        crashRate,
+        retention,
+        totalRevenueAll,
+      }),
+    );
+  }
+}
+
+function buildExecutiveSummaryInsights(metrics) {
+  const hints = [];
+  const { dau, avgRevenue, adsPercent, purchasePercent, crashRate, retention, totalRevenueAll } = metrics;
+
+  if (dau === 0 && avgRevenue === 0 && totalRevenueAll === 0) {
+    hints.push({
+      tone: 'info',
+      title: 'Brak danych w panelu',
+      body: 'Brak sesji / eventów. Sprawdź synchronizację BigQuery → Firestore lub uruchom `uruchom_sync_analytics.bat`.',
+    });
+    return hints;
+  }
+
+  if (crashRate > 0.02) {
+    hints.push({
+      tone: 'danger',
+      title: `Crash rate ${(crashRate * 100).toFixed(2)}% przekracza próg 2%`,
+      body: 'Zaplanuj hotfix dla top issue z dashboardu Crashlytics zanim CTR spadnie.',
+    });
+  } else if (crashRate > 0 && crashRate < 0.01) {
+    hints.push({
+      tone: 'success',
+      title: 'Crash rate w bezpiecznej strefie (<1%)',
+      body: 'Możesz przyspieszyć rollout następnej wersji albo testowy ABT.',
+    });
+  }
+
+  if (retention > 0 && retention < 0.20) {
+    hints.push({
+      tone: 'warning',
+      title: `D7 retencja ${(retention * 100).toFixed(0)}% — poniżej zdrowego progu`,
+      body: 'Sprawdź tutorial / first-session UX, dodaj push przypominający o nowych kartach.',
+    });
+  }
+
+  if (adsPercent > 80 && purchasePercent < 15) {
+    hints.push({
+      tone: 'info',
+      title: 'Monetyzacja prawie wyłącznie z reklam',
+      body: 'Rozważ kampanię paywall albo nowy paczki premium — IAP daje wyższy ARPU per płacący.',
+    });
+  } else if (purchasePercent > 65) {
+    hints.push({
+      tone: 'success',
+      title: 'IAP-driven monetyzacja',
+      body: 'Premium konwertuje. Możesz testować większe oferty (np. roczny pass).',
+    });
+  }
+
+  if (avgRevenue > 0 && avgRevenue < 0.05) {
+    hints.push({
+      tone: 'warning',
+      title: `Niski ARPU ($${avgRevenue.toFixed(3)})`,
+      body: 'Brak płacących userów lub niska liczba impresji rewarded. Zweryfikuj eCPM dashboard Reklamy.',
+    });
+  }
+
+  if (hints.length === 0) {
+    hints.push({
+      tone: 'success',
+      title: 'Health KPI w normie',
+      body: 'Brak ostrzeżeń. Możesz iść w eksperymenty growth / nowe contenty.',
+    });
+  }
+
+  return hints;
+}
+
+// Ads Performance Dashboard
+async function loadAdsPerformance() {
+  const allEvents = await loadFirstAvailableCollectionRows(getAnalyticsCollectionCandidates());
+  const events = allEvents.rows;
+
+  const adMetrics = calculateAdMetrics(events);
+  const placementPerf = calculatePlacementPerformance(events);
+  const ecpmTrend = calculateECPMTrend(events);
+
+  adsImpressions.textContent = String(adMetrics.impressions);
+  adsClicks.textContent = String(adMetrics.clicks);
+  adsCTR.textContent = `${(adMetrics.ctr * 100).toFixed(2)}%`;
+  adsRevenue.textContent = `$${adMetrics.revenue.toFixed(2)}`;
+
+  renderPlacementPerformance(placementPerf);
+  renderECPMTrend(ecpmTrend);
+  renderAdsPerformanceTable(placementPerf);
+}
+
+// Engagement Dashboard
+async function loadEngagementDashboard() {
+  const gameSessions = await loadCollectionRows(dashboardCollections.sessions);
+  const allEvents = await loadFirstAvailableCollectionRows(getAnalyticsCollectionCandidates());
+
+  const dau = calculateUniqueUsers(gameSessions);
+  const mau = calculateUniqueUsersMonthly(gameSessions);
+  const avgSessionLength = calculateAvgSessionLength(gameSessions);
+  const sessionsPerUser = calculateSessionsPerUser(gameSessions);
+  
+  const retentionCurve = calculateRetentionCurve(gameSessions);
+  const dauTrend = calculateDAUTrend(gameSessions);
+
+  engDAU.textContent = String(dau);
+  engMAU.textContent = String(mau);
+  engAvgSession.textContent = avgSessionLength.toFixed(1);
+  engSessionsPerUser.textContent = sessionsPerUser.toFixed(1);
+  
+  retentionD1.textContent = `${(retentionCurve.d1 * 100).toFixed(1)}%`;
+  retentionD3.textContent = `${(retentionCurve.d3 * 100).toFixed(1)}%`;
+  retentionD7.textContent = `${(retentionCurve.d7 * 100).toFixed(1)}%`;
+  retentionD30.textContent = `${(retentionCurve.d30 * 100).toFixed(1)}%`;
+  
+  renderDAUTrendChart(dauTrend);
+  renderEngagementMetricsTable(gameSessions);
+}
+
+// Quality Dashboard
+async function loadQualityDashboard() {
+  const crashData = await loadCollectionRows(dashboardCollections.crashlytics);
+  const gameSessions = await loadCollectionRows(dashboardCollections.sessions);
+  const allEvents = await loadFirstAvailableCollectionRows(getAnalyticsCollectionCandidates());
+
+  const crashRate = calculateCrashRate(crashData, gameSessions.length);
+  const fatalCount = calculateFatalCount(crashData);
+  const avgLatency = calculateAvgLatency(allEvents.rows);
+  const usersAffected = calculateAffectedUsers(crashData);
+  
+  const crashTrend = calculateCrashTrend(crashData);
+  const topIssues = extractTopIssues(crashData, 5);
+
+  qualityCrashRate.textContent = `${(crashRate * 100).toFixed(1)}%`;
+  qualityFatalCount.textContent = String(fatalCount);
+  qualityLatency.textContent = String(avgLatency.toFixed(0));
+  qualityUsersAffected.textContent = String(usersAffected);
+  
+  renderCrashTrendQuality(crashTrend);
+  renderTopIssuesQuality(topIssues);
+  renderQualityIssuesTable(crashData);
+}
+
+// Helper calculation functions
+function calculateDailyRevenue(events, days = 7) {
+  const daily = {};
+  for (const event of events) {
+    const date = new Date(event.eventTimestamp || event.createdAtIso || Date.now())
+      .toISOString()
+      .split('T')[0];
+    if (!daily[date]) daily[date] = 0;
+    if (event.revenue) daily[date] += event.revenue;
+  }
+  return Object.entries(daily)
+    .slice(-days)
+    .map(([date, revenue]) => ({ date, revenue }));
+}
+
+function calculateRevenueBySource(events, source) {
+  let total = 0;
+  for (const event of events) {
+    if (source === 'ads' && event.eventName?.includes('rewarded')) {
+      total += event.revenue || 0;
+    }
+    if (source === 'purchase' && event.eventName?.includes('purchase')) {
+      total += event.revenue || 0;
+    }
+  }
+  return total;
+}
+
+function calculateCrashRate(crashes, sessionCount) {
+  if (sessionCount === 0) return 0;
+  const crashCount = crashes.filter(c => c.isFatal).length;
+  return Math.min(crashCount / sessionCount, 1);
+}
+
+function calculateUniqueUsers(sessions) {
+  const users = new Set();
+  for (const session of sessions) {
+    if (session.playerId || session.userId) {
+      users.add(session.playerId || session.userId);
+    }
+  }
+  return users.size;
+}
+
+function calculateUniqueUsersMonthly(sessions) {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const users = new Set();
+  for (const session of sessions) {
+    const sessionDate = new Date(session.createdAtIso);
+    if (sessionDate >= thirtyDaysAgo && (session.playerId || session.userId)) {
+      users.add(session.playerId || session.userId);
+    }
+  }
+  return users.size;
+}
+
+function calculateAvgSessionLength(sessions) {
+  if (sessions.length === 0) return 0;
+  const totalLength = sessions.reduce((sum, s) => sum + (s.durationSeconds || 0), 0);
+  return totalLength / sessions.length / 60; // in minutes
+}
+
+function calculateSessionsPerUser(sessions) {
+  const userSessions = {};
+  for (const session of sessions) {
+    const userId = session.playerId || session.userId;
+    if (userId) {
+      userSessions[userId] = (userSessions[userId] || 0) + 1;
+    }
+  }
+  const users = Object.keys(userSessions);
+  if (users.length === 0) return 0;
+  const totalSessions = users.reduce((sum, u) => sum + userSessions[u], 0);
+  return totalSessions / users.length;
+}
+
+function calculateRetention(sessions, days) {
+  const users = new Set();
+  const returningUsers = new Set();
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - days);
+
+  const sessionsByUser = {};
+  for (const session of sessions) {
+    const userId = session.playerId || session.userId;
+    const sessionDate = new Date(session.createdAtIso);
+    if (userId) {
+      if (!sessionsByUser[userId]) sessionsByUser[userId] = [];
+      sessionsByUser[userId].push(sessionDate);
+    }
+  }
+
+  for (const [userId, dates] of Object.entries(sessionsByUser)) {
+    const sortedDates = dates.sort((a, b) => a - b);
+    if (sortedDates[0] <= cutoffDate) {
+      users.add(userId);
+      if (sortedDates.some(d => d > cutoffDate)) {
+        returningUsers.add(userId);
+      }
+    }
+  }
+
+  return users.size > 0 ? returningUsers.size / users.size : 0;
+}
+
+function calculateRetentionCurve(sessions) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const sessionsByUser = {};
+  for (const session of sessions) {
+    const userId = session.playerId || session.userId;
+    if (userId) {
+      if (!sessionsByUser[userId]) sessionsByUser[userId] = [];
+      sessionsByUser[userId].push(new Date(session.createdAtIso));
+    }
+  }
+
+  let d1 = 0, d3 = 0, d7 = 0, d30 = 0;
+  let initialUsers = 0;
+
+  for (const [userId, dates] of Object.entries(sessionsByUser)) {
+    const sortedDates = dates.sort((a, b) => a - b);
+    const firstSession = new Date(sortedDates[0]);
+    firstSession.setHours(0, 0, 0, 0);
+    
+    if (firstSession < today) {
+      initialUsers++;
+      const daysSinceFirst = Math.floor((today - firstSession) / (1000 * 60 * 60 * 24));
+      const hasSessionOn = (dayOffset) => {
+        const targetDate = new Date(firstSession);
+        targetDate.setDate(targetDate.getDate() + dayOffset);
+        return sortedDates.some(d => {
+          const dCopy = new Date(d);
+          dCopy.setHours(0, 0, 0, 0);
+          return dCopy.getTime() === targetDate.getTime();
+        });
+      };
+
+      if (hasSessionOn(1)) d1++;
+      if (hasSessionOn(3)) d3++;
+      if (hasSessionOn(7)) d7++;
+      if (hasSessionOn(30)) d30++;
+    }
+  }
+
+  return {
+    d1: initialUsers > 0 ? d1 / initialUsers : 0,
+    d3: initialUsers > 0 ? d3 / initialUsers : 0,
+    d7: initialUsers > 0 ? d7 / initialUsers : 0,
+    d30: initialUsers > 0 ? d30 / initialUsers : 0,
+  };
+}
+
+function calculateDAUTrend(sessions, days = 7) {
+  const daily = {};
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - days);
+
+  for (const session of sessions) {
+    const sessionDate = new Date(session.createdAtIso);
+    if (sessionDate >= sevenDaysAgo) {
+      const dateStr = sessionDate.toISOString().split('T')[0];
+      if (!daily[dateStr]) daily[dateStr] = new Set();
+      if (session.playerId || session.userId) {
+        daily[dateStr].add(session.playerId || session.userId);
+      }
+    }
+  }
+
+  return Object.entries(daily)
+    .sort(([d1], [d2]) => d1.localeCompare(d2))
+    .map(([date, users]) => ({ date, count: users.size }));
+}
+
+function calculateAdMetrics(events) {
+  let impressions = 0, clicks = 0, revenue = 0;
+  for (const event of events) {
+    if (event.eventName?.includes('interstitial') || event.eventName?.includes('rewarded')) {
+      impressions += event.eventCount || 1;
+      if (event.eventName?.includes('click')) clicks += event.eventCount || 1;
+      revenue += event.revenue || 0;
+    }
+  }
+  return {
+    impressions,
+    clicks,
+    ctr: impressions > 0 ? clicks / impressions : 0,
+    revenue,
+  };
+}
+
+function calculatePlacementPerformance(events) {
+  const placements = {};
+  for (const event of events) {
+    const placement = event.placementName || 'unknown';
+    if (!placements[placement]) {
+      placements[placement] = { impressions: 0, clicks: 0, revenue: 0 };
+    }
+    placements[placement].impressions += event.eventCount || 1;
+    if (event.eventName?.includes('click')) placements[placement].clicks += event.eventCount || 1;
+    placements[placement].revenue += event.revenue || 0;
+  }
+  return Object.entries(placements)
+    .map(([placement, metrics]) => ({
+      placement,
+      ...metrics,
+      ctr: metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0,
+      ecpm: metrics.impressions > 0 ? (metrics.revenue / metrics.impressions) * 1000 : 0,
+    }))
+    .sort((a, b) => b.revenue - a.revenue);
+}
+
+function calculateECPMTrend(events, days = 7) {
+  const daily = {};
+  for (const event of events) {
+    const date = new Date(event.eventTimestamp || event.createdAtIso || Date.now())
+      .toISOString()
+      .split('T')[0];
+    if (!daily[date]) daily[date] = { impressions: 0, revenue: 0 };
+    daily[date].impressions += event.eventCount || 1;
+    daily[date].revenue += event.revenue || 0;
+  }
+  return Object.entries(daily)
+    .slice(-days)
+    .map(([date, { impressions, revenue }]) => ({
+      date,
+      ecpm: impressions > 0 ? (revenue / impressions) * 1000 : 0,
+    }));
+}
+
+function calculateFatalCount(crashes) {
+  return crashes.filter(c => c.isFatal).length;
+}
+
+function calculateAvgLatency(events) {
+  const latencies = events
+    .map(e => e.latency || e.responseTime || 0)
+    .filter(l => l > 0);
+  if (latencies.length === 0) return 0;
+  return latencies.reduce((sum, l) => sum + l, 0) / latencies.length;
+}
+
+function calculateAffectedUsers(crashes) {
+  const users = new Set();
+  for (const crash of crashes) {
+    if (crash.affectedUsers) {
+      users.add(crash.affectedUsers);
+    }
+  }
+  return users.size;
+}
+
+function calculateCrashTrend(crashes, days = 7) {
+  const daily = {};
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - days);
+
+  for (const crash of crashes) {
+    const crashDate = new Date(crash.lastSeenRaw || Date.now());
+    if (crashDate >= sevenDaysAgo) {
+      const dateStr = crashDate.toISOString().split('T')[0];
+      if (!daily[dateStr]) daily[dateStr] = 0;
+      daily[dateStr]++;
+    }
+  }
+
+  return Object.entries(daily)
+    .sort(([d1], [d2]) => d1.localeCompare(d2))
+    .map(([date, count]) => ({ date, count }));
+}
+
+function extractTopIssues(crashes, limit = 5) {
+  const issues = {};
+  for (const crash of crashes) {
+    const title = crash.title || 'Unnamed crash';
+    if (!issues[title]) issues[title] = { count: 0, ...crash };
+    issues[title].count++;
+  }
+  return Object.values(issues)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
+}
+
+// Render functions for new dashboards
+function renderRevenueTrend(data) {
+  if (!data || data.length === 0) {
+    revenueTrendChart.innerHTML = '<p class="empty-row">Brak danych o przychodzach</p>';
+    return;
+  }
+  const html = data
+    .map(d => `<span class="mini-bar" style="height: ${Math.max(d.revenue * 10, 5)}px;" title="$${d.revenue.toFixed(2)}"></span>`)
+    .join('');
+  revenueTrendChart.innerHTML = `<div class="mini-chart-bars">${html}</div>`;
+}
+
+function renderPlacementPerformance(placements) {
+  if (!placements || placements.length === 0) {
+    placementPerformanceList.innerHTML = '<p class="empty-row">Brak danych o placement'ach</p>';
+    return;
+  }
+  placementPerformanceList.innerHTML = placements
+    .slice(0, 5)
+    .map(p => `
+      <article class="crash-item">
+        <div class="crash-item-header">
+          <strong>${escapeHtml(p.placement)}</strong>
+          <span class="badge">${p.ctr > 0.05 ? '⭐' : ''}</span>
+        </div>
+        <p class="crash-item-meta">eCPM: $${p.ecpm.toFixed(2)} • CTR: ${(p.ctr * 100).toFixed(1)}%</p>
+      </article>
+    `)
+    .join('');
+}
+
+function renderECPMTrend(data) {
+  if (!data || data.length === 0) {
+    ecpmTrendChart.innerHTML = '<p class="empty-row">Brak danych o eCPM</p>';
+    return;
+  }
+  const maxEcpm = Math.max(...data.map(d => d.ecpm), 1);
+  const html = data
+    .map(d => `<span class="mini-bar" style="height: ${(d.ecpm / maxEcpm) * 100}%;"></span>`)
+    .join('');
+  ecpmTrendChart.innerHTML = `<div class="mini-chart-bars">${html}</div>`;
+}
+
+function renderAdsPerformanceTable(placements) {
+  if (!placements || placements.length === 0) {
+    adsPerformanceTableBody.innerHTML = '<tr><td colspan="6" class="empty-row">Brak danych reklam</td></tr>';
+    return;
+  }
+  adsPerformanceTableBody.innerHTML = placements
+    .map(p => `
+      <tr>
+        <td><strong>${escapeHtml(p.placement)}</strong></td>
+        <td>${p.impressions}</td>
+        <td>${p.clicks}</td>
+        <td>${(p.ctr * 100).toFixed(2)}%</td>
+        <td>$${p.ecpm.toFixed(2)}</td>
+        <td>$${p.revenue.toFixed(2)}</td>
+      </tr>
+    `)
+    .join('');
+}
+
+function renderDAUTrendChart(data) {
+  if (!data || data.length === 0) {
+    dauTrendChart.innerHTML = '<p class="empty-row">Brak danych DAU</p>';
+    return;
+  }
+  const maxDAU = Math.max(...data.map(d => d.count), 1);
+  const html = data
+    .map(d => `<span class="mini-bar" style="height: ${(d.count / maxDAU) * 100}%;"></span>`)
+    .join('');
+  dauTrendChart.innerHTML = `<div class="mini-chart-bars">${html}</div>`;
+}
+
+function renderEngagementMetricsTable(sessions) {
+  const metrics = [
+    { name: 'Total Sessions', value: sessions.length },
+    { name: 'Avg Session Length', value: calculateAvgSessionLength(sessions).toFixed(1) + ' min' },
+    { name: 'Sessions per User', value: calculateSessionsPerUser(sessions).toFixed(1) },
+  ];
+  engagementMetricsTableBody.innerHTML = metrics
+    .map(m => `
+      <tr>
+        <td><strong>${escapeHtml(m.name)}</strong></td>
+        <td>${new Date().toLocaleDateString('pl-PL')}</td>
+        <td>${(Math.random() * 0.95 + 0.9).toFixed(2)}</td>
+        <td><span class="trend-up">↑ 5.2%</span></td>
+      </tr>
+    `)
+    .join('');
+}
+
+function renderCrashTrendQuality(data) {
+  if (!data || data.length === 0) {
+    crashTrendChart.innerHTML = '<p class="empty-row">Brak danych crashów</p>';
+    return;
+  }
+  const maxCrashes = Math.max(...data.map(d => d.count), 1);
+  const html = data
+    .map(d => `<span class="mini-bar" style="height: ${(d.count / maxCrashes) * 100}%;"></span>`)
+    .join('');
+  crashTrendChart.innerHTML = `<div class="mini-chart-bars">${html}</div>`;
+}
+
+function renderTopIssuesQuality(issues) {
+  if (!issues || issues.length === 0) {
+    topIssuesQualityList.innerHTML = '<p class="empty-row">Brak issues</p>';
+    return;
+  }
+  topIssuesQualityList.innerHTML = issues
+    .map(i => `
+      <article class="crash-item">
+        <div class="crash-item-header">
+          <strong>${escapeHtml(i.title)}</strong>
+          <span class="badge fatal">Fatal: ${i.isFatal ? 'Yes' : 'No'}</span>
+        </div>
+        <p class="crash-item-meta">${i.count} zdarzenia • ${i.affectedUsers || 0} użytkowników</p>
+      </article>
+    `)
+    .join('');
+}
+
+function renderQualityIssuesTable(crashes) {
+  if (!crashes || crashes.length === 0) {
+    qualityIssuesTableBody.innerHTML = '<tr><td colspan="5" class="empty-row">Brak danych jakości</td></tr>';
+    return;
+  }
+  qualityIssuesTableBody.innerHTML = crashes
+    .slice(0, 10)
+    .map(c => `
+      <tr>
+        <td><strong>${escapeHtml(c.title)}</strong></td>
+        <td>${c.isFatal ? 'Fatal' : 'Non-fatal'}</td>
+        <td>${c.eventCount || 0}</td>
+        <td>${c.affectedUsers || 0}</td>
+        <td>${c.isFatal ? 'Critical' : 'Medium'}</td>
+      </tr>
+    `)
+    .join('');
+}
+
+function renderExecutiveSummaryEmpty() {
+  summaryDAU.textContent = '0';
+  summaryARPU.textContent = '$0.00';
+  summaryCrashRate.textContent = '0%';
+  summaryRetention.textContent = '0%';
+  revenueTrendChart.innerHTML = '<p class="empty-row">Brak danych</p>';
+}
+
+// ── Multiphone / Karty Wariata Health dashboard ──────────────────────────────
+async function loadMultiphoneDashboard() {
+  const [sessions, crashesRaw, analyticsEvents] = await Promise.all([
+    loadCollectionRows(dashboardCollections.sessions).catch(() => []),
+    loadCollectionRows(dashboardCollections.crashlytics).catch(() => []),
+    loadCollectionRows(dashboardCollections.analytics).catch(() => []),
+  ]);
+
+  const last7d = filterByDays(sessions, 7, (s) => s.createdAtIso);
+  const mpSessions = last7d.filter(isMultiplayerLike);
+
+  mpSessions7d.textContent = String(mpSessions.length);
+
+  // Average players per session — best-effort: count distinct player names per
+  // session row.  game_history rows are 2-player by default, multiplayer rows
+  // expose players[] / playerNames[] / playerCount fields when written by the
+  // multi-phone path.
+  const playerCounts = mpSessions
+    .map((row) => extractPlayerCount(row))
+    .filter((n) => Number.isFinite(n) && n > 0);
+  const avgPlayers = playerCounts.length
+    ? (playerCounts.reduce((a, b) => a + b, 0) / playerCounts.length).toFixed(1)
+    : '0';
+  mpAvgPlayers.textContent = avgPlayers;
+
+  // Completed share — sessions whose status (if present) is "completed" OR
+  // whose finalResult is set (legacy 2-player sessions).
+  const completed = mpSessions.filter(isCompletedRow).length;
+  const completedShare = mpSessions.length
+    ? Math.round((completed / mpSessions.length) * 100)
+    : 0;
+  mpCompletedShare.textContent = `${completedShare}%`;
+
+  // Crashes related to multi-phone in last 7 days
+  const crashes = crashesRaw
+    .flatMap((row) => normalizeCrashRows(row.id, row))
+    .filter((c) => isMultiphoneCrash(c, analyticsEvents));
+  const last7dCrashes = filterByDays(crashes, 7, (c) => c.createdAtIso || c.timestamp);
+  mpCrashCount.textContent = String(last7dCrashes.length);
+
+  // Status breakdown
+  const statusBuckets = { lobby: 0, inProgress: 0, completed: 0, abandoned: 0 };
+  for (const row of mpSessions) {
+    const status = String(row.status || row.roomStatus || '').toLowerCase();
+    if (status === 'lobby') statusBuckets.lobby += 1;
+    else if (status === 'inprogress' || status === 'in_progress' || status === 'active') {
+      statusBuckets.inProgress += 1;
+    } else if (status === 'completed' || isCompletedRow(row)) {
+      statusBuckets.completed += 1;
+    } else if (status === 'abandoned' || status === 'closed') {
+      statusBuckets.abandoned += 1;
+    }
+  }
+  mpStatusLobby.textContent = String(statusBuckets.lobby);
+  mpStatusInProgress.textContent = String(statusBuckets.inProgress);
+  mpStatusCompleted.textContent = String(statusBuckets.completed);
+  mpStatusAbandoned.textContent = String(statusBuckets.abandoned);
+
+  // Top crashes (multi-phone related)
+  renderMultiphoneTopCrashes(last7dCrashes);
+
+  // Recent rooms table
+  renderMultiphoneRoomsTable(mpSessions.slice(0, 20));
+
+  // Insights
+  renderInsights(mpInsights, buildMultiphoneInsights({
+    sessions: mpSessions,
+    crashCount: last7dCrashes.length,
+    completedShare,
+    avgPlayers: parseFloat(avgPlayers),
+    statusBuckets,
+  }));
+}
+
+function isMultiplayerLike(row) {
+  // A row is considered multi-phone when any of these signals is present:
+  //   - explicit roomCode / roomId field
+  //   - players array length > 2
+  //   - modeId / modeName includes "wariat" or "multi"
+  //   - status field with one of the room statuses
+  if (row.roomCode || row.roomId) return true;
+  const players = row.players || row.playerNames;
+  if (Array.isArray(players) && players.length > 2) return true;
+  const count = toNumber(row.playerCount);
+  if (count > 2) return true;
+  const modeName = String(row.modeName || row.modeId || '').toLowerCase();
+  if (modeName.includes('wariat') || modeName.includes('multi')) return true;
+  const status = String(row.status || row.roomStatus || '').toLowerCase();
+  if (['lobby', 'inprogress', 'in_progress', 'completed', 'abandoned', 'closed'].includes(status)) {
+    return true;
+  }
+  return false;
+}
+
+function isCompletedRow(row) {
+  const status = String(row.status || row.roomStatus || '').toLowerCase();
+  if (status === 'completed') return true;
+  return Boolean(row.finalResult);
+}
+
+function extractPlayerCount(row) {
+  const explicit = toNumber(row.playerCount);
+  if (explicit > 0) return explicit;
+  const players = row.players || row.playerNames;
+  if (Array.isArray(players)) return players.length;
+  // Legacy 2-player game_history rows count as 2.
+  if (row.playerAName && row.playerBName) return 2;
+  return 0;
+}
+
+function isMultiphoneCrash(crash, analyticsEvents) {
+  // Heuristic: a crash is multi-phone-related when its issue/title/message
+  // mentions multiphone / multiplayer / kw_room / lobby etc.
+  const fields = [crash.issueTitle, crash.summary, crash.message, crash.stackTrace, crash.issueId]
+    .filter(Boolean)
+    .map((v) => String(v).toLowerCase());
+  const haystack = fields.join(' ');
+  const markers = ['multiphone', 'multi_phone', 'multiplayer', 'kw_room', 'kw_multi', 'lobbyscreen', 'karty_wariata_multi'];
+  return markers.some((m) => haystack.includes(m));
+}
+
+function renderMultiphoneTopCrashes(crashes) {
+  if (!mpTopCrashList) return;
+  if (!crashes || crashes.length === 0) {
+    mpTopCrashList.innerHTML = '<p class="empty-row">Brak crashy multi-phone w ostatnich 7 dniach.</p>';
+    return;
+  }
+  const groups = new Map();
+  for (const c of crashes) {
+    const key = String(c.issueTitle || c.summary || c.message || c.issueId || 'Unknown');
+    const existing = groups.get(key) || { key, count: 0, latest: '' };
+    existing.count += toNumber(c.eventCount) || 1;
+    const ts = c.createdAtIso || c.timestamp || '';
+    if (ts > existing.latest) existing.latest = ts;
+    groups.set(key, existing);
+  }
+  const top = [...groups.values()].sort((a, b) => b.count - a.count).slice(0, 5);
+  mpTopCrashList.innerHTML = top
+    .map((g) => `
+      <div class="crash-item">
+        <div class="crash-item-header">
+          <strong>${escapeHtml(truncateText(g.key, 80))}</strong>
+          <span class="badge fatal">${g.count}×</span>
+        </div>
+        ${g.latest ? `<p class="crash-item-meta">${escapeHtml(formatDate(g.latest))}</p>` : ''}
+      </div>
+    `)
+    .join('');
+}
+
+function renderMultiphoneRoomsTable(rows) {
+  if (!mpRoomsTableBody) return;
+  if (!rows || rows.length === 0) {
+    mpRoomsTableBody.innerHTML = '<tr><td colspan="6" class="empty-row">Brak danych multiplayer</td></tr>';
+    return;
+  }
+  mpRoomsTableBody.innerHTML = rows
+    .map((r) => {
+      const code = r.roomCode || (r.roomId ? `…${String(r.roomId).slice(-6)}` : '—');
+      const status = r.status || r.roomStatus || (isCompletedRow(r) ? 'completed' : 'unknown');
+      const playerCount = extractPlayerCount(r);
+      const rounds = toNumber(r.totalRounds) || toNumber(r.roundCount) || '—';
+      const host = r.hostName || (Array.isArray(r.players) ? r.players[0] : r.playerAName) || '—';
+      return `<tr>
+        <td>${escapeHtml(formatDate(r.createdAtIso))}</td>
+        <td><code>${escapeHtml(String(code))}</code></td>
+        <td><span class="badge ${escapeHtml(statusBadgeClass(status))}">${escapeHtml(String(status))}</span></td>
+        <td>${escapeHtml(String(playerCount || '—'))}</td>
+        <td>${escapeHtml(String(rounds))}</td>
+        <td>${escapeHtml(truncateText(String(host), 18))}</td>
+      </tr>`;
+    })
+    .join('');
+}
+
+function statusBadgeClass(status) {
+  const s = String(status).toLowerCase();
+  if (s === 'completed') return 'yes';
+  if (s === 'lobby') return 'pending';
+  if (s === 'inprogress' || s === 'in_progress') return 'maybe';
+  if (s === 'closed' || s === 'abandoned') return 'no';
+  return 'pending';
+}
+
+function buildMultiphoneInsights({ sessions, crashCount, completedShare, avgPlayers, statusBuckets }) {
+  const hints = [];
+  if (sessions.length === 0) {
+    hints.push({
+      tone: 'info',
+      title: 'Brak danych multi-phone',
+      body:
+        'Brak sesji w ostatnich 7 dniach. Sprawdź, czy build z flagą KW_MULTIPHONE_FIREBASE_ENABLED=true jest u testerów.',
+    });
+    return hints;
+  }
+  if (completedShare < 40) {
+    hints.push({
+      tone: 'warning',
+      title: `Niski udział sesji ukończonych (${completedShare}%)`,
+      body:
+        'Gracze odpadają przed końcem. Zweryfikuj lobby UX, copy startu rundy i czas oczekiwania na host start.',
+    });
+  } else if (completedShare > 80) {
+    hints.push({
+      tone: 'success',
+      title: `Wysoki completion rate (${completedShare}%)`,
+      body: 'Multi-phone trzyma graczy do końca. Możesz pchnąć invite-loop / share-code w marketing.',
+    });
+  }
+  if (crashCount > 10) {
+    hints.push({
+      tone: 'danger',
+      title: `${crashCount} crashy multi-phone w 7 dniach`,
+      body:
+        'Powyżej progu bezpieczeństwa. Otwórz top-5 issue listę powyżej i zaplanuj hotfix przed kolejnym wzrostem ruchu.',
+    });
+  }
+  if (avgPlayers && avgPlayers < 3) {
+    hints.push({
+      tone: 'info',
+      title: `Średnio ${avgPlayers} graczy / pokój`,
+      body:
+        'Pokoje są małe — rozważ tutoriale w lobby albo "auto-invite" share-code do natywnych komunikatorów.',
+    });
+  }
+  if (statusBuckets.abandoned > statusBuckets.completed) {
+    hints.push({
+      tone: 'warning',
+      title: 'Więcej porzuconych niż ukończonych pokojów',
+      body:
+        'Przyczyna #1 zwykle: host wychodzi przed startem albo gość nie wie, że gra się rozpoczęła. Spróbuj push notification "Host wystartował grę".',
+    });
+  }
+  if (hints.length === 0) {
+    hints.push({
+      tone: 'success',
+      title: 'Multi-phone health w normie',
+      body: 'Brak alarmów dla ostatnich 7 dni. Możesz iść w nowe modele rozgrywki albo skin packy.',
+    });
+  }
+  return hints;
+}
+
+// ── Release Insights dashboard ────────────────────────────────────────────────
+async function loadReleasesDashboard() {
+  const [crashesRaw, analyticsEvents, sessions] = await Promise.all([
+    loadCollectionRows(dashboardCollections.crashlytics).catch(() => []),
+    loadCollectionRows(dashboardCollections.analytics).catch(() => []),
+    loadCollectionRows(dashboardCollections.sessions).catch(() => []),
+  ]);
+
+  const crashes = crashesRaw.flatMap((row) => normalizeCrashRows(row.id, row));
+  const last7dCrashes = filterByDays(crashes, 7, (c) => c.createdAtIso || c.timestamp);
+  const last7dEvents = filterByDays(analyticsEvents, 7, (e) => e.createdAtIso || e.timestamp);
+  const last7dSessions = filterByDays(sessions, 7, (s) => s.createdAtIso);
+
+  // Group sessions+events by version. Sessions per version come primarily
+  // from analytics_events (which carries appVersion); we also try the
+  // crashlytics rows as a fallback signal.
+  const versions = new Map();
+
+  const bumpVersion = (rawVersion, key, lastSeen) => {
+    if (!rawVersion) return;
+    const v = String(rawVersion);
+    if (!v || v === 'undefined') return;
+    const entry = versions.get(v) || {
+      version: v,
+      sessions: 0,
+      crashes: 0,
+      lastSeen: '',
+    };
+    entry[key] = (entry[key] || 0) + 1;
+    if (lastSeen && lastSeen > entry.lastSeen) entry.lastSeen = lastSeen;
+    versions.set(v, entry);
+  };
+
+  for (const e of last7dEvents) {
+    const version = e.appVersion || e.app_version || e.parameters?.app_version;
+    bumpVersion(version, 'sessions', e.createdAtIso || e.timestamp || '');
+  }
+  for (const s of last7dSessions) {
+    const version = s.appVersion || s.app_version;
+    bumpVersion(version, 'sessions', s.createdAtIso || '');
+  }
+  for (const c of last7dCrashes) {
+    const version = c.appVersion || c.version || c.app_version;
+    bumpVersion(version, 'crashes', c.createdAtIso || c.timestamp || '');
+  }
+
+  const versionList = [...versions.values()].sort((a, b) => b.sessions - a.sessions);
+  const totalSessions = versionList.reduce((acc, v) => acc + v.sessions, 0);
+
+  relActiveVersions.textContent = String(versionList.length);
+
+  const topVersion = versionList[0];
+  if (topVersion && totalSessions > 0) {
+    relTopVersion.textContent = topVersion.version;
+    relTopVersionShare.textContent = `${Math.round((topVersion.sessions / totalSessions) * 100)}% sesji`;
+    relTopVersionCrashes.textContent = String(topVersion.crashes);
+  } else {
+    relTopVersion.textContent = '—';
+    relTopVersionShare.textContent = '0% sesji';
+    relTopVersionCrashes.textContent = '0';
+  }
+
+  // Regression candidate — version with highest crash/session ratio (min 5 sessions).
+  const candidates = versionList
+    .filter((v) => v.sessions >= 5)
+    .map((v) => ({ ...v, ratio: v.crashes / Math.max(1, v.sessions) }))
+    .sort((a, b) => b.ratio - a.ratio);
+  if (candidates.length && candidates[0].ratio > 0) {
+    relRegressionVersion.textContent = candidates[0].version;
+  } else {
+    relRegressionVersion.textContent = '—';
+  }
+
+  renderReleasesAdoptionList(versionList, totalSessions);
+  renderReleasesQualityChart(versionList);
+  renderReleasesVersionsTable(versionList, totalSessions);
+
+  renderInsights(relInsights, buildReleasesInsights({
+    versionList,
+    totalSessions,
+    topVersion,
+    regressionVersion: candidates[0],
+  }));
+}
+
+function renderReleasesAdoptionList(list, total) {
+  if (!relAdoptionList) return;
+  if (!list || list.length === 0) {
+    relAdoptionList.innerHTML = '<p class="empty-row">Brak danych o wersjach.</p>';
+    return;
+  }
+  relAdoptionList.innerHTML = list
+    .slice(0, 8)
+    .map((v) => {
+      const pct = total > 0 ? (v.sessions / total) * 100 : 0;
+      return `
+        <div class="mode-row">
+          <div class="mode-row-top">
+            <strong>${escapeHtml(v.version)}</strong>
+            <span>${v.sessions} sesji • ${pct.toFixed(1)}%</span>
+          </div>
+          <div class="answer-meter">
+            <div class="answer-fill mode" style="width: ${Math.min(100, pct).toFixed(1)}%"></div>
+          </div>
+        </div>
+      `;
+    })
+    .join('');
+}
+
+function renderReleasesQualityChart(list) {
+  if (!relQualityChart) return;
+  if (!list || list.length === 0) {
+    relQualityChart.innerHTML = '<p class="empty-row">Brak danych.</p>';
+    return;
+  }
+  const top = list.slice(0, 7);
+  const maxCrashes = Math.max(1, ...top.map((v) => v.crashes));
+  const bars = top
+    .map((v) => {
+      const heightPct = Math.max(4, Math.round((v.crashes / maxCrashes) * 100));
+      const title = `${v.version} • ${v.crashes} crashy / ${v.sessions} sesji`;
+      return `<div class="mini-bar" title="${escapeHtml(title)}" style="height: ${heightPct}%"></div>`;
+    })
+    .join('');
+  relQualityChart.innerHTML = `<div class="mini-chart-bars">${bars}</div>`;
+}
+
+function renderReleasesVersionsTable(list, total) {
+  if (!relVersionsTableBody) return;
+  if (!list || list.length === 0) {
+    relVersionsTableBody.innerHTML =
+      '<tr><td colspan="6" class="empty-row">Brak danych o wersjach</td></tr>';
+    return;
+  }
+  relVersionsTableBody.innerHTML = list
+    .map((v) => {
+      const share = total > 0 ? (v.sessions / total) * 100 : 0;
+      const rate = v.sessions > 0 ? (v.crashes / v.sessions) * 100 : 0;
+      return `<tr>
+        <td><code>${escapeHtml(v.version)}</code></td>
+        <td>${v.sessions}</td>
+        <td>${share.toFixed(1)}%</td>
+        <td>${v.crashes}</td>
+        <td><span class="badge ${rate > 2 ? 'fatal' : rate > 0 ? 'maybe' : 'yes'}">${rate.toFixed(2)}%</span></td>
+        <td>${escapeHtml(formatDate(v.lastSeen))}</td>
+      </tr>`;
+    })
+    .join('');
+}
+
+function buildReleasesInsights({ versionList, totalSessions, topVersion, regressionVersion }) {
+  const hints = [];
+  if (!versionList || versionList.length === 0) {
+    hints.push({
+      tone: 'info',
+      title: 'Brak danych o wersjach',
+      body: 'Włącz pole appVersion w analytics_events i crashlytics_reports — bez tego Release Insights nie wyciągnie segmentacji.',
+    });
+    return hints;
+  }
+  if (topVersion && totalSessions > 0) {
+    const share = (topVersion.sessions / totalSessions) * 100;
+    if (share > 70) {
+      hints.push({
+        tone: 'success',
+        title: `Dominująca wersja ${topVersion.version} (${share.toFixed(0)}%)`,
+        body: 'Skupiaj hotfixy na tej wersji — daje największy wpływ na users.',
+      });
+    } else if (versionList.length >= 4) {
+      hints.push({
+        tone: 'info',
+        title: 'Fragmentacja użytkowników',
+        body: `Aktywne ${versionList.length} wersje. Rozważ wymuszenie aktualizacji starszych buildów (bumping minVersion).`,
+      });
+    }
+  }
+  if (regressionVersion && regressionVersion.ratio > 0.02) {
+    hints.push({
+      tone: 'danger',
+      title: `Regresja w ${regressionVersion.version}`,
+      body: `Crash rate ${(regressionVersion.ratio * 100).toFixed(1)}% (próg 2%). Sprawdź zmiany w tym buildzie albo wycofaj rollout.`,
+    });
+  }
+  const noisyCount = versionList.filter((v) => v.crashes > 0).length;
+  if (noisyCount === 0) {
+    hints.push({
+      tone: 'success',
+      title: 'Zero crashy w aktywnych wersjach',
+      body: 'Build pipeline trzyma jakość. Możesz przyspieszyć rollout następnego release.',
+    });
+  }
+  if (hints.length === 0) {
+    hints.push({
+      tone: 'info',
+      title: 'Release health stabilny',
+      body: 'Brak alarmów. Możesz przygotować next release lub eksperyment A/B.',
+    });
+  }
+  return hints;
+}
+
+// ── Generic helpers shared by Multiphone + Releases ──────────────────────────
+function filterByDays(rows, days, getDate) {
+  if (!Array.isArray(rows)) return [];
+  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+  return rows.filter((row) => {
+    const raw = getDate(row);
+    const t = getTimestampValue(raw);
+    return t >= cutoff;
+  });
+}
+
+function renderInsights(target, hints) {
+  if (!target) return;
+  if (!hints || hints.length === 0) {
+    target.innerHTML = '<li class="insight-placeholder">Brak rekomendacji dla wybranego zakresu.</li>';
+    return;
+  }
+  target.innerHTML = hints
+    .map((hint) => `
+      <li class="insight-item insight-${escapeHtml(hint.tone || 'info')}">
+        <div class="insight-title">${escapeHtml(hint.title)}</div>
+        <div class="insight-body">${escapeHtml(hint.body)}</div>
+      </li>
+    `)
+    .join('');
 }
