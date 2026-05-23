@@ -200,6 +200,17 @@
                 <span class="tab-subtitle">Multi-phone, pokoje, awarie</span>
               </button>
               <button
+                id="individualAnswersTabButton"
+                class="tab-button"
+                type="button"
+                role="tab"
+                aria-selected="false"
+                aria-controls="individualAnswersPanel"
+              >
+                <span class="tab-title">Odpowiedzi indywidualne</span>
+                <span class="tab-subtitle">Wizja + odpowiedź per gracz</span>
+              </button>
+              <button
                 id="releasesTabButton"
                 class="tab-button"
                 type="button"
@@ -990,6 +1001,72 @@
                 </div>
               </div>
               <ul id="mpInsights" class="insights-list">
+                <li class="insight-placeholder">Załaduj dane, aby zobaczyć rekomendacje.</li>
+              </ul>
+            </section>
+          </section>
+
+          <section id="individualAnswersPanel" class="dashboard-panel" hidden>
+            <div class="stats-grid">
+              <article class="stat-card">
+                <p class="stat-label">Wszystkie odpowiedzi</p>
+                <strong id="iaTotalAnswers">0</strong>
+                <span class="stat-hint">rekordy z kolekcji kw_individual_answers</span>
+              </article>
+              <article class="stat-card">
+                <p class="stat-label">Dopisz chaos</p>
+                <strong id="iaCustomAnswers">0</strong>
+                <span class="stat-hint">udział odpowiedzi własnych</span>
+              </article>
+              <article class="stat-card">
+                <p class="stat-label">Unikalni gracze</p>
+                <strong id="iaUniquePlayers">0</strong>
+                <span class="stat-hint">po playerId / nazwie</span>
+              </article>
+              <article class="stat-card">
+                <p class="stat-label">Unikalne sesje</p>
+                <strong id="iaUniqueSessions">0</strong>
+                <span class="stat-hint">sessionId / roomId</span>
+              </article>
+            </div>
+
+            <section class="panel-card table-card">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Odpowiedzi graczy</p>
+                  <h2>Historia odpowiedzi per runda</h2>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Sesja</th>
+                      <th>Runda</th>
+                      <th>Gracz</th>
+                      <th>Typ</th>
+                      <th>Wizja</th>
+                      <th>Odpowiedź</th>
+                    </tr>
+                  </thead>
+                  <tbody id="iaTableBody">
+                    <tr>
+                      <td colspan="7" class="empty-row">Brak danych odpowiedzi indywidualnych</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel-card insight-card">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Co warto monitorować</p>
+                  <h2>Wnioski jakościowe</h2>
+                </div>
+              </div>
+              <ul id="iaInsights" class="insights-list">
                 <li class="insight-placeholder">Załaduj dane, aby zobaczyć rekomendacje.</li>
               </ul>
             </section>

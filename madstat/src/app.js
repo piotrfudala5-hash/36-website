@@ -53,6 +53,7 @@ const adsPerformanceTabButton = document.getElementById('adsPerformanceTabButton
 const engagementTabButton = document.getElementById('engagementTabButton');
 const qualityTabButton = document.getElementById('qualityTabButton');
 const multiphoneTabButton = document.getElementById('multiphoneTabButton');
+const individualAnswersTabButton = document.getElementById('individualAnswersTabButton');
 const releasesTabButton = document.getElementById('releasesTabButton');
 const gamesPanel = document.getElementById('gamesPanel');
 const crashlyticsPanel = document.getElementById('crashlyticsPanel');
@@ -63,6 +64,7 @@ const adsPerformancePanel = document.getElementById('adsPerformancePanel');
 const engagementPanel = document.getElementById('engagementPanel');
 const qualityPanel = document.getElementById('qualityPanel');
 const multiphonePanel = document.getElementById('multiphonePanel');
+const individualAnswersPanel = document.getElementById('individualAnswersPanel');
 const releasesPanel = document.getElementById('releasesPanel');
 
 // Multiphone (Karty Wariata) elements
@@ -77,6 +79,14 @@ const mpStatusAbandoned = document.getElementById('mpStatusAbandoned');
 const mpTopCrashList = document.getElementById('mpTopCrashList');
 const mpRoomsTableBody = document.getElementById('mpRoomsTableBody');
 const mpInsights = document.getElementById('mpInsights');
+
+// Individual answers elements
+const iaTotalAnswers = document.getElementById('iaTotalAnswers');
+const iaCustomAnswers = document.getElementById('iaCustomAnswers');
+const iaUniquePlayers = document.getElementById('iaUniquePlayers');
+const iaUniqueSessions = document.getElementById('iaUniqueSessions');
+const iaTableBody = document.getElementById('iaTableBody');
+const iaInsights = document.getElementById('iaInsights');
 
 // Release Insights elements
 const relActiveVersions = document.getElementById('relActiveVersions');
@@ -206,7 +216,19 @@ const DASHBOARD_STORAGE_KEYS = {
   crashGroupSort: 'statapp.crashGroupSort',
 };
 
-const ALLOWED_DASHBOARDS = new Set(['games', 'modes', 'analytics', 'crashlytics', 'executiveSummary', 'adsPerformance', 'engagement', 'quality', 'multiphone', 'releases']);
+const ALLOWED_DASHBOARDS = new Set([
+  'games',
+  'modes',
+  'analytics',
+  'crashlytics',
+  'executiveSummary',
+  'adsPerformance',
+  'engagement',
+  'quality',
+  'multiphone',
+  'individualAnswers',
+  'releases',
+]);
 
 let activeDashboard = restoreActiveDashboard();
 let crashRowsCache = [];
@@ -261,6 +283,10 @@ qualityTabButton.addEventListener('click', async () => {
 
 multiphoneTabButton.addEventListener('click', async () => {
   await switchDashboard('multiphone');
+});
+
+individualAnswersTabButton.addEventListener('click', async () => {
+  await switchDashboard('individualAnswers');
 });
 
 releasesTabButton.addEventListener('click', async () => {
@@ -342,6 +368,7 @@ const DASHBOARD_LABELS = {
   engagement: 'Zaangażowanie',
   quality: 'Jakość',
   multiphone: 'Karty Wariata',
+  individualAnswers: 'Odpowiedzi indywidualne',
   releases: 'Release Insights',
 };
 
@@ -397,6 +424,8 @@ async function loadDashboard() {
       await loadQualityDashboard();
     } else if (activeDashboard === 'multiphone') {
       await loadMultiphoneDashboard();
+    } else if (activeDashboard === 'individualAnswers') {
+      await loadIndividualAnswersDashboard();
     } else if (activeDashboard === 'releases') {
       await loadReleasesDashboard();
     } else {
@@ -430,6 +459,10 @@ async function loadDashboard() {
       renderStats([]);
       renderTable([]);
       docsCountValue.textContent = '0';
+    } else if (activeDashboard === 'individualAnswers') {
+      renderIndividualAnswersStats([]);
+      renderIndividualAnswersTable([]);
+      renderInsights(iaInsights, []);
     } else {
       renderExecutiveSummaryEmpty();
     }
@@ -462,6 +495,7 @@ function updateDashboardVisibility() {
   const isEngagement = activeDashboard === 'engagement';
   const isQuality = activeDashboard === 'quality';
   const isMultiphone = activeDashboard === 'multiphone';
+  const isIndividualAnswers = activeDashboard === 'individualAnswers';
   const isReleases = activeDashboard === 'releases';
 
   gamesTabButton.classList.toggle('active', isGames);
@@ -473,6 +507,7 @@ function updateDashboardVisibility() {
   engagementTabButton.classList.toggle('active', isEngagement);
   qualityTabButton.classList.toggle('active', isQuality);
   multiphoneTabButton.classList.toggle('active', isMultiphone);
+  individualAnswersTabButton.classList.toggle('active', isIndividualAnswers);
   releasesTabButton.classList.toggle('active', isReleases);
 
   gamesTabButton.setAttribute('aria-selected', String(isGames));
@@ -484,6 +519,7 @@ function updateDashboardVisibility() {
   engagementTabButton.setAttribute('aria-selected', String(isEngagement));
   qualityTabButton.setAttribute('aria-selected', String(isQuality));
   multiphoneTabButton.setAttribute('aria-selected', String(isMultiphone));
+  individualAnswersTabButton.setAttribute('aria-selected', String(isIndividualAnswers));
   releasesTabButton.setAttribute('aria-selected', String(isReleases));
 
   gamesPanel.hidden = !isGames;
@@ -495,6 +531,7 @@ function updateDashboardVisibility() {
   engagementPanel.hidden = !isEngagement;
   qualityPanel.hidden = !isQuality;
   multiphonePanel.hidden = !isMultiphone;
+  individualAnswersPanel.hidden = !isIndividualAnswers;
   releasesPanel.hidden = !isReleases;
 
   updateBannerView();
@@ -517,6 +554,10 @@ function dashboardErrorTitleForActivePanel() {
 
   if (activeDashboard === 'modes') {
     return 'Tryby gry nie zwracają danych';
+  }
+
+  if (activeDashboard === 'individualAnswers') {
+    return 'Odpowiedzi indywidualne nie zwracają danych';
   }
 
   return 'Statystyki gry nie zwracają danych';
@@ -544,6 +585,10 @@ function normalizeDashboardError(error) {
       return 'Brakuje uprawnień do odczytu kolekcji mode_play_stats, analytics_events i monetization_events albo te kolekcje nie istnieją jeszcze w Firestore.';
     }
 
+    if (activeDashboard === 'individualAnswers') {
+      return 'Brakuje reguły odczytu kolekcji kw_individual_answers albo kolekcja nie istnieje jeszcze w Firestore.';
+    }
+
     if (activeDashboard === 'analytics') {
       return 'Brakuje reguły odczytu albo kolekcje analytics_events i monetization_events nie istnieją jeszcze w Firestore.';
     }
@@ -560,6 +605,19 @@ async function loadGamesDashboard() {
   renderStats(rows);
   renderTable(rows);
   docsCountValue.textContent = String(rows.length);
+}
+
+async function loadIndividualAnswersDashboard() {
+  const collectionName = dashboardCollections.kwIndividualAnswers;
+  const rows = collectionName ? await loadCollectionRows(collectionName) : [];
+  const normalized = rows
+    .map((row) => normalizeKwIndividualAnswerRow(row.id, row))
+    .filter((row) => hasUsefulIndividualAnswerData(row))
+    .sort((left, right) => getTimestampValue(right.createdAtRaw) - getTimestampValue(left.createdAtRaw));
+
+  renderIndividualAnswersStats(normalized);
+  renderIndividualAnswersTable(normalized);
+  renderIndividualAnswersInsights(normalized);
 }
 
 async function loadCrashlyticsDashboard() {
@@ -1656,6 +1714,150 @@ function renderTable(rows) {
       `;
     })
     .join('');
+}
+
+function normalizeKwIndividualAnswerRow(docId, row) {
+  const sources = [row, row?.payload, row?.data, row?.metadata].filter(Boolean);
+  const roundIndex = toNumber(pickValueFromSources(sources, [
+    ['roundIndex'],
+    ['round'],
+    ['round_number'],
+  ]));
+  const totalRounds = toNumber(pickValueFromSources(sources, [
+    ['totalRounds'],
+    ['roundCount'],
+    ['roundsTotal'],
+  ]));
+  const answerTypeRaw = String(pickValueFromSources(sources, [
+    ['answerType'],
+    ['submissionType'],
+    ['type'],
+  ]) || '').toLowerCase();
+  const answerType = answerTypeRaw === 'custom' ? 'custom' : 'deck';
+
+  return {
+    docId,
+    createdAtRaw: pickValueFromSources(sources, [
+      ['createdAt'],
+      ['submittedAt'],
+      ['timestamp'],
+      ['createdAtMs'],
+    ]),
+    sessionId: String(pickValueFromSources(sources, [['sessionId']]) || ''),
+    roomId: String(pickValueFromSources(sources, [['roomId']]) || ''),
+    roundIndex,
+    totalRounds,
+    playerId: String(pickValueFromSources(sources, [['playerId']]) || ''),
+    playerName: String(pickValueFromSources(sources, [['playerName'], ['displayName']]) || ''),
+    answerType,
+    visionId: String(pickValueFromSources(sources, [['visionId']]) || ''),
+    visionText: String(pickValueFromSources(sources, [['visionText'], ['questionText']]) || ''),
+    elementId: String(pickValueFromSources(sources, [['elementId'], ['answerId']]) || ''),
+    answerText: String(pickValueFromSources(sources, [['answerText'], ['submissionText'], ['text']]) || ''),
+  };
+}
+
+function hasUsefulIndividualAnswerData(row) {
+  return Boolean(
+    row.answerText
+    || row.elementId
+    || row.sessionId
+    || row.roomId
+    || getTimestampValue(row.createdAtRaw) > 0
+  );
+}
+
+function renderIndividualAnswersStats(rows) {
+  const total = rows.length;
+  const customCount = rows.filter((row) => row.answerType === 'custom').length;
+  const uniquePlayers = new Set(rows.map((row) => row.playerId || row.playerName).filter(Boolean)).size;
+  const uniqueSessions = new Set(rows.map((row) => row.sessionId || row.roomId).filter(Boolean)).size;
+
+  iaTotalAnswers.textContent = String(total);
+  iaCustomAnswers.textContent = String(customCount);
+  iaUniquePlayers.textContent = String(uniquePlayers);
+  iaUniqueSessions.textContent = String(uniqueSessions);
+}
+
+function individualAnswerTypeLabel(type) {
+  return type === 'custom' ? 'Dopisz chaos' : 'Karta z ręki';
+}
+
+function individualAnswerTypeBadge(type) {
+  return type === 'custom' ? 'mixed' : 'pending';
+}
+
+function renderIndividualAnswersTable(rows) {
+  if (!rows.length) {
+    iaTableBody.innerHTML = '<tr><td colspan="7" class="empty-row">Brak danych odpowiedzi indywidualnych</td></tr>';
+    return;
+  }
+
+  iaTableBody.innerHTML = rows
+    .map((row) => {
+      const session = row.sessionId || row.roomId || '—';
+      const roundLabel = row.totalRounds > 0
+        ? `${row.roundIndex + 1}/${row.totalRounds}`
+        : String(row.roundIndex + 1);
+      const playerName = row.playerName || row.playerId || '—';
+      const visionValue = row.visionText || row.visionId || '—';
+      const answerValue = row.answerText || row.elementId || '—';
+      const answerType = renderBadge(
+        individualAnswerTypeBadge(row.answerType),
+        individualAnswerTypeLabel(row.answerType),
+      );
+
+      return `
+        <tr>
+          <td>${escapeHtml(formatDate(row.createdAtRaw))}</td>
+          <td><code>${escapeHtml(truncateText(String(session), 28))}</code></td>
+          <td>${escapeHtml(roundLabel)}</td>
+          <td>
+            <strong>${escapeHtml(truncateText(String(playerName), 28))}</strong>
+            ${row.playerId ? `<div class="table-note">${escapeHtml(row.playerId)}</div>` : ''}
+          </td>
+          <td>${answerType}</td>
+          <td title="${escapeHtml(String(visionValue))}">${escapeHtml(truncateText(String(visionValue), 72))}</td>
+          <td title="${escapeHtml(String(answerValue))}">${escapeHtml(truncateText(String(answerValue), 88))}</td>
+        </tr>
+      `;
+    })
+    .join('');
+}
+
+function renderIndividualAnswersInsights(rows) {
+  if (!rows.length) {
+    renderInsights(iaInsights, []);
+    return;
+  }
+
+  const customCount = rows.filter((row) => row.answerType === 'custom').length;
+  const customShare = Math.round((customCount / Math.max(rows.length, 1)) * 100);
+
+  const byPlayer = new Map();
+  for (const row of rows) {
+    const key = row.playerId || row.playerName || '(unknown)';
+    const current = byPlayer.get(key) || { total: 0, custom: 0, label: row.playerName || row.playerId || '(unknown)' };
+    current.total += 1;
+    if (row.answerType === 'custom') current.custom += 1;
+    byPlayer.set(key, current);
+  }
+  const topPlayer = [...byPlayer.values()].sort((a, b) => b.total - a.total)[0];
+
+  const hints = [
+    {
+      tone: customShare >= 30 ? 'good' : 'info',
+      title: 'Udział "Dopisz chaos"',
+      body: `${customShare}% odpowiedzi to własny tekst (${customCount}/${rows.length}).`,
+    },
+    {
+      tone: 'info',
+      title: 'Najbardziej aktywny gracz',
+      body: `${topPlayer.label}: ${topPlayer.total} odpowiedzi, w tym ${topPlayer.custom} własnych.`,
+    },
+  ];
+
+  renderInsights(iaInsights, hints);
 }
 
 function renderCrashTable(rows) {

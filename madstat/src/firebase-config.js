@@ -8,6 +8,7 @@ export const dashboardCollections = {
   analytics: 'analytics_events',
   analyticsLegacy: 'monetization_events',
   crashlytics: 'crashlytics_reports',
+  kwIndividualAnswers: 'kw_individual_answers',
 };
 
 export const firebaseConfig = {
