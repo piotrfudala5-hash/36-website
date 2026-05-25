@@ -381,33 +381,32 @@ h2 {
 
 .hero-mode-rail {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
   margin-top: 24px;
 }
 
 .hero-mode-pill {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 14px;
-  border-radius: 20px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+  padding: 15px 16px;
+  min-height: 146px;
+  border-radius: 22px;
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.22);
   box-shadow: 0 12px 26px rgba(4, 8, 14, 0.28);
   backdrop-filter: blur(8px);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
-.hero-mode-pill-icon {
-  display: inline-grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.9);
-  color: #1d2a42;
-  font-size: 18px;
+.hero-mode-pill:hover,
+.hero-mode-pill:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px rgba(4, 8, 14, 0.34);
 }
 
 .hero-mode-pill-copy {
@@ -417,30 +416,39 @@ h2 {
 .hero-mode-pill-copy span {
   display: block;
   color: rgba(255, 255, 255, 0.76);
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
 .hero-mode-pill strong {
   display: block;
   color: #fff;
-  font-size: 1.02rem;
-  line-height: 1.22;
+  font-size: clamp(1.58rem, 2vw, 1.85rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
 }
 
 .hero-mode-pill-note {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   color: rgba(255, 255, 255, 0.82);
-  font-size: 0.79rem;
-  line-height: 1.35;
+  font-size: 0.99rem;
+  line-height: 1.32;
+  max-width: 24ch;
 }
 
 .hero-mode-pill-arrow {
-  color: rgba(255, 255, 255, 0.74);
-  font-size: 1.3rem;
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-top: 2px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 1.08rem;
   font-weight: 700;
 }
 
@@ -466,21 +474,6 @@ h2 {
     rgba(232, 186, 74, 0.66),
     rgba(248, 213, 126, 0.22)
   );
-}
-
-.hero-mode-pill--solo .hero-mode-pill-icon {
-  background: rgba(225, 232, 255, 0.96);
-  color: #324c8f;
-}
-
-.hero-mode-pill--duo .hero-mode-pill-icon {
-  background: rgba(255, 234, 236, 0.96);
-  color: #b65466;
-}
-
-.hero-mode-pill--group .hero-mode-pill-icon {
-  background: rgba(255, 248, 226, 0.96);
-  color: #b28316;
 }
 
 .hero-showcase {
