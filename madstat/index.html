@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>36stopni Admin Dashboard, Monetyzacja i Crashlytics</title>
     <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg?v=20260506-1" />
-    <link rel="stylesheet" href="./src/styles.css?v=20260517-2" />
+    <link rel="stylesheet" href="./src/styles.css?v=20260525-1" />
   </head>
   <body>
     <div class="page-shell">
@@ -936,11 +936,11 @@
                 </div>
                 <dl class="kpi-list">
                   <div>
-                    <dt>Lobby (waiting):</dt>
+                    <dt>Trwające (lobby + in progress):</dt>
                     <dd id="mpStatusLobby">0</dd>
                   </div>
                   <div>
-                    <dt>W trakcie rundy:</dt>
+                    <dt>Wszystkie pokoje (snapshot):</dt>
                     <dd id="mpStatusInProgress">0</dd>
                   </div>
                   <div>
@@ -952,6 +952,37 @@
                     <dd id="mpStatusAbandoned">0</dd>
                   </div>
                 </dl>
+              </section>
+
+              <section class="panel-card">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Utrzymanie bazy</p>
+                    <h2>Czyszczenie kategorii</h2>
+                  </div>
+                </div>
+                <p class="table-note">
+                  Ukończone są automatycznie czyszczone po 2h, a opuszczone/zamknięte po 30 dniach.
+                </p>
+                <div class="mp-cleanup-controls">
+                  <label class="mp-cleanup-option">
+                    <input id="mpDeleteCompleted" type="checkbox" checked />
+                    <span>Ukończone (eligible: <strong id="mpDeleteCompletedEligible">0</strong>)</span>
+                  </label>
+                  <label class="mp-cleanup-option">
+                    <input id="mpDeleteAbandoned" type="checkbox" checked />
+                    <span>Opuszczone / zamknięte (eligible: <strong id="mpDeleteAbandonedEligible">0</strong>)</span>
+                  </label>
+                  <label class="mp-cleanup-option">
+                    <input id="mpDeleteOngoing" type="checkbox" />
+                    <span>Trwające (awaryjnie)</span>
+                  </label>
+                </div>
+                <div class="panel-toolbar">
+                  <button id="mpDeleteSelectedButton" type="button" class="ghost-button">Usuń wybrane</button>
+                  <button id="mpReloadBucketsButton" type="button" class="ghost-button">Odśwież statusy</button>
+                </div>
+                <p id="mpCleanupMessage" class="table-note"></p>
               </section>
 
               <section class="panel-card">
@@ -1232,6 +1263,6 @@
       </main>
     </div>
 
-    <script type="module" src="./src/app.js?v=20260517-3"></script>
+    <script type="module" src="./src/app.js?v=20260525-1"></script>
   </body>
 </html>

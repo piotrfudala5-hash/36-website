@@ -16,6 +16,10 @@ import {
   query,
   startAfter,
 } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js';
+import {
+  getFunctions,
+  httpsCallable,
+} from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-functions.js';
 
 import { adminAccess, dashboardCollections, firebaseConfig } from './firebase-config.js';
 
@@ -76,6 +80,14 @@ const mpStatusLobby = document.getElementById('mpStatusLobby');
 const mpStatusInProgress = document.getElementById('mpStatusInProgress');
 const mpStatusCompleted = document.getElementById('mpStatusCompleted');
 const mpStatusAbandoned = document.getElementById('mpStatusAbandoned');
+const mpDeleteCompleted = document.getElementById('mpDeleteCompleted');
+const mpDeleteAbandoned = document.getElementById('mpDeleteAbandoned');
+const mpDeleteOngoing = document.getElementById('mpDeleteOngoing');
+const mpDeleteCompletedEligible = document.getElementById('mpDeleteCompletedEligible');
+const mpDeleteAbandonedEligible = document.getElementById('mpDeleteAbandonedEligible');
+const mpDeleteSelectedButton = document.getElementById('mpDeleteSelectedButton');
+const mpReloadBucketsButton = document.getElementById('mpReloadBucketsButton');
+const mpCleanupMessage = document.getElementById('mpCleanupMessage');
 const mpTopCrashList = document.getElementById('mpTopCrashList');
 const mpRoomsTableBody = document.getElementById('mpRoomsTableBody');
 const mpInsights = document.getElementById('mpInsights');
@@ -232,6 +244,8 @@ const ALLOWED_DASHBOARDS = new Set([
 
 let activeDashboard = restoreActiveDashboard();
 let crashRowsCache = [];
+let mpRoomStatsCache = null;
+let mpCleanupBusy = false;
 
 adminEmailValue.textContent = adminAccess.email;
 modesAdminEmailValue.textContent = adminAccess.email;
@@ -247,6 +261,9 @@ if (!firebaseConfig.appId || firebaseConfig.appId.includes('REPLACE_WITH')) {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const fns = getFunctions(app, 'europe-west1');
+const kwRoomCategoryStatsCallable = httpsCallable(fns, 'kwRoomCategoryStats');
+const kwRoomCategoryDeleteCallable = httpsCallable(fns, 'kwRoomCategoryDelete');
 const provider = new GoogleAuthProvider();
 
 gamesTabButton.addEventListener('click', async () => {
@@ -335,6 +352,14 @@ logoutButton.addEventListener('click', async () => {
 
 refreshButton.addEventListener('click', async () => {
   await loadDashboard();
+});
+
+mpReloadBucketsButton?.addEventListener('click', async () => {
+  await refreshMultiphoneRoomStats({ force: true });
+});
+
+mpDeleteSelectedButton?.addEventListener('click', async () => {
+  await handleDeleteSelectedRoomCategories();
 });
 
 onAuthStateChanged(auth, async (user) => {
@@ -3159,11 +3184,132 @@ function renderExecutiveSummaryEmpty() {
   revenueTrendChart.innerHTML = '<p class="empty-row">Brak danych</p>';
 }
 
+function setMultiphoneCleanupMessage(text, tone = 'muted') {
+  if (!mpCleanupMessage) return;
+  mpCleanupMessage.textContent = text || '';
+  mpCleanupMessage.classList.remove('mp-cleanup-error', 'mp-cleanup-success');
+  if (tone === 'error') mpCleanupMessage.classList.add('mp-cleanup-error');
+  if (tone === 'success') mpCleanupMessage.classList.add('mp-cleanup-success');
+}
+
+function setMultiphoneCleanupBusy(busy) {
+  mpCleanupBusy = busy;
+  if (mpDeleteSelectedButton) mpDeleteSelectedButton.disabled = busy;
+  if (mpReloadBucketsButton) mpReloadBucketsButton.disabled = busy;
+}
+
+function applyRoomStatsToMultiphoneStatus(roomStats) {
+  if (!roomStats || !roomStats.counts) return;
+  const counts = roomStats.counts;
+  const eligible = roomStats.eligibleForDeletion || {};
+
+  mpStatusLobby.textContent = String(toNumber(counts.ongoing));
+  mpStatusInProgress.textContent = String(toNumber(counts.total));
+  mpStatusCompleted.textContent = String(toNumber(counts.completed));
+  mpStatusAbandoned.textContent = String(toNumber(counts.abandoned));
+
+  if (mpDeleteCompletedEligible) {
+    mpDeleteCompletedEligible.textContent = String(toNumber(eligible.completed));
+  }
+  if (mpDeleteAbandonedEligible) {
+    mpDeleteAbandonedEligible.textContent = String(toNumber(eligible.abandoned));
+  }
+}
+
+function mapRoomStatsSampleToRows(sampledRooms) {
+  if (!Array.isArray(sampledRooms)) return [];
+  return sampledRooms.map((row) => ({
+    roomId: row.roomId || '',
+    roomCode: row.roomCode || '',
+    status: row.status || 'unknown',
+    playerCount: toNumber(row.playerCount),
+    totalRounds: toNumber(row.totalRounds) || 0,
+    hostName: row.hostDisplayName || '',
+    createdAtIso: row.updatedAtMs ? new Date(Number(row.updatedAtMs)).toISOString() : '',
+  }));
+}
+
+async function refreshMultiphoneRoomStats({ force = false } = {}) {
+  if (!force && mpRoomStatsCache) {
+    return mpRoomStatsCache;
+  }
+
+  try {
+    const response = await kwRoomCategoryStatsCallable();
+    const stats = response?.data || null;
+    mpRoomStatsCache = stats;
+    applyRoomStatsToMultiphoneStatus(stats);
+    setMultiphoneCleanupMessage('');
+    return stats;
+  } catch (error) {
+    console.warn('[KW_STATS] kwRoomCategoryStats unavailable:', error);
+    setMultiphoneCleanupMessage(
+      'Nie udalo sie pobrac statusow pokoi z backendu maintenance.',
+      'error',
+    );
+    return null;
+  }
+}
+
+function selectedRoomCleanupCategories() {
+  const categories = [];
+  if (mpDeleteCompleted?.checked) categories.push('completed');
+  if (mpDeleteAbandoned?.checked) categories.push('abandoned');
+  if (mpDeleteOngoing?.checked) categories.push('ongoing');
+  return categories;
+}
+
+async function handleDeleteSelectedRoomCategories() {
+  if (mpCleanupBusy) return;
+  const categories = selectedRoomCleanupCategories();
+  if (!categories.length) {
+    setMultiphoneCleanupMessage('Wybierz co najmniej jedna kategorie.', 'error');
+    return;
+  }
+
+  if (categories.includes('ongoing')) {
+    const ok = window.confirm(
+      'Usuwanie trwajacych pokoi przerwie aktywne sesje. Kontynuowac?',
+    );
+    if (!ok) return;
+  }
+
+  try {
+    setMultiphoneCleanupBusy(true);
+    setMultiphoneCleanupMessage('Usuwanie danych...');
+    const response = await kwRoomCategoryDeleteCallable({
+      categories,
+      dryRun: false,
+      forceOngoing: categories.includes('ongoing'),
+    });
+    const payload = response?.data || {};
+    const deletedCount = toNumber(payload.deletedCount);
+    setMultiphoneCleanupMessage(
+      `Usunieto pokojow: ${deletedCount}.`,
+      'success',
+    );
+    mpRoomStatsCache = null;
+    await refreshMultiphoneRoomStats({ force: true });
+    if (activeDashboard === 'multiphone') {
+      await loadMultiphoneDashboard();
+    }
+  } catch (error) {
+    console.error('[KW_STATS] delete categories failed:', error);
+    setMultiphoneCleanupMessage(
+      `Nie udalo sie usunac kategorii: ${error?.message || error}`,
+      'error',
+    );
+  } finally {
+    setMultiphoneCleanupBusy(false);
+  }
+}
+
 // ── Karty Wariata Health dashboard ──────────────────────────────────────────
 // Reads from analytics_events (canonical source of kw_* events) + crashlytics
 // reports + game_history (fallback). Tile copy framed as "Karty Wariata" so
 // the panel produces signal even when sessions don't carry a multi-phone tag.
 async function loadMultiphoneDashboard() {
+  mpRoomStatsCache = null;
   const [analyticsRaw, crashesRaw, sessions] = await Promise.all([
     loadFirstAvailableCollectionRows(getAnalyticsCollectionCandidates())
       .then((r) => r.rows)
@@ -3263,13 +3409,30 @@ async function loadMultiphoneDashboard() {
       }
     }
   }
-  mpStatusLobby.textContent = String(statusBuckets.lobby);
-  mpStatusInProgress.textContent = String(statusBuckets.inProgress);
-  mpStatusCompleted.textContent = String(statusBuckets.completed);
-  mpStatusAbandoned.textContent = String(statusBuckets.abandoned);
+  let roomRows = mpLikeSessions.slice(0, 20);
+  const roomStats = await refreshMultiphoneRoomStats();
+  if (roomStats?.counts) {
+    statusBuckets.lobby = toNumber(roomStats.counts.ongoing);
+    statusBuckets.inProgress = toNumber(roomStats.counts.total);
+    statusBuckets.completed = toNumber(roomStats.counts.completed);
+    statusBuckets.abandoned = toNumber(roomStats.counts.abandoned);
+    applyRoomStatsToMultiphoneStatus(roomStats);
+
+    const sampledRows = mapRoomStatsSampleToRows(roomStats.sampledRooms).slice(0, 20);
+    if (sampledRows.length > 0) {
+      roomRows = sampledRows;
+    }
+  } else {
+    mpStatusLobby.textContent = String(statusBuckets.lobby);
+    mpStatusInProgress.textContent = String(statusBuckets.inProgress);
+    mpStatusCompleted.textContent = String(statusBuckets.completed);
+    mpStatusAbandoned.textContent = String(statusBuckets.abandoned);
+    if (mpDeleteCompletedEligible) mpDeleteCompletedEligible.textContent = '0';
+    if (mpDeleteAbandonedEligible) mpDeleteAbandonedEligible.textContent = '0';
+  }
 
   renderMultiphoneTopCrashes(kwCrashes);
-  renderMultiphoneRoomsTable(mpLikeSessions.slice(0, 20));
+  renderMultiphoneRoomsTable(roomRows);
 
   renderInsights(
     mpInsights,

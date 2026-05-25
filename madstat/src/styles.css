@@ -517,6 +517,36 @@ code {
   font-size: 13px;
 }
 
+.mp-cleanup-controls {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.mp-cleanup-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.58);
+  font-size: 13px;
+}
+
+.mp-cleanup-option input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+}
+
+.mp-cleanup-error {
+  color: #a03f55;
+}
+
+.mp-cleanup-success {
+  color: #2f7a67;
+}
+
 .table-wrap {
   overflow-x: auto;
 }
