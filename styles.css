@@ -431,34 +431,56 @@ h2 {
   line-height: 1.22;
 }
 
+.hero-mode-pill-note {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.79rem;
+  line-height: 1.35;
+}
+
 .hero-mode-pill-arrow {
   color: rgba(255, 255, 255, 0.74);
   font-size: 1.3rem;
   font-weight: 700;
 }
 
-.hero-mode-pill--rose {
+.hero-mode-pill--solo {
   background: linear-gradient(
     135deg,
-    rgba(230, 160, 170, 0.2),
-    rgba(255, 255, 255, 0.08)
+    rgba(95, 115, 192, 0.58),
+    rgba(142, 157, 224, 0.24)
   );
 }
 
-.hero-mode-pill--amber {
+.hero-mode-pill--duo {
   background: linear-gradient(
     135deg,
-    rgba(241, 198, 97, 0.22),
-    rgba(255, 255, 255, 0.08)
+    rgba(232, 149, 156, 0.58),
+    rgba(242, 182, 187, 0.22)
   );
 }
 
-.hero-mode-pill--mint {
+.hero-mode-pill--group {
   background: linear-gradient(
     135deg,
-    rgba(170, 201, 180, 0.24),
-    rgba(255, 255, 255, 0.08)
+    rgba(232, 186, 74, 0.66),
+    rgba(248, 213, 126, 0.22)
   );
+}
+
+.hero-mode-pill--solo .hero-mode-pill-icon {
+  background: rgba(225, 232, 255, 0.96);
+  color: #324c8f;
+}
+
+.hero-mode-pill--duo .hero-mode-pill-icon {
+  background: rgba(255, 234, 236, 0.96);
+  color: #b65466;
+}
+
+.hero-mode-pill--group .hero-mode-pill-icon {
+  background: rgba(255, 248, 226, 0.96);
+  color: #b28316;
 }
 
 .hero-showcase {
