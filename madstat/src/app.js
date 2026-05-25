@@ -3342,7 +3342,13 @@ function eligibleCountersFromSummaries(summaries, now) {
   return counters;
 }
 
-function selectSummariesForDelete({ summaries, categories, now, forceOngoing = false }) {
+function selectSummariesForDelete({
+  summaries,
+  categories,
+  now,
+  forceOngoing = false,
+  enforceRetention = true,
+}) {
   const requested = new Set(
     (Array.isArray(categories) ? categories : [])
       .map((v) => String(v || '').trim().toLowerCase())
@@ -3355,11 +3361,19 @@ function selectSummariesForDelete({ summaries, categories, now, forceOngoing = f
 
   for (const summary of summaries) {
     const retentionCategory = eligibleRetentionCategory(summary, now);
-    if (allowCompleted && retentionCategory === 'completed') {
+    if (
+      allowCompleted &&
+      ((enforceRetention && retentionCategory === 'completed') ||
+        (!enforceRetention && summary.bucket === 'completed'))
+    ) {
       selected.push(summary);
       continue;
     }
-    if (allowAbandoned && retentionCategory === 'abandoned') {
+    if (
+      allowAbandoned &&
+      ((enforceRetention && retentionCategory === 'abandoned') ||
+        (!enforceRetention && summary.bucket === 'abandoned'))
+    ) {
       selected.push(summary);
       continue;
     }
@@ -3476,7 +3490,10 @@ async function refreshMultiphoneRoomStatsClientSide() {
   return stats;
 }
 
-async function deleteRoomCategoriesClientSide(categories) {
+async function deleteRoomCategoriesClientSide(
+  categories,
+  { respectRetention = true } = {},
+) {
   const now = Date.now();
   const forceOngoing = categories.includes('ongoing');
   const summaries = await loadAllRoomSummariesClientSide();
@@ -3485,6 +3502,7 @@ async function deleteRoomCategoriesClientSide(categories) {
     categories,
     now,
     forceOngoing,
+    enforceRetention: respectRetention,
   });
   let deletedCount = 0;
   for (const summary of selected) {
@@ -3561,7 +3579,10 @@ async function handleDeleteSelectedRoomCategories({ forceClientSide = false } = 
     let usedClientSideFallback = forceClientSide;
 
     if (forceClientSide) {
-      deletedCount = await deleteRoomCategoriesClientSide(categories);
+      deletedCount = await deleteRoomCategoriesClientSide(categories, {
+        // Manual cleanup is explicit admin action: delete selected categories now.
+        respectRetention: false,
+      });
     } else {
       try {
         const response = await kwRoomCategoryDeleteCallable({
@@ -3574,7 +3595,12 @@ async function handleDeleteSelectedRoomCategories({ forceClientSide = false } = 
       } catch (callableError) {
         console.warn('[KW_STATS] callable delete unavailable, using manual mode:', callableError);
         usedClientSideFallback = true;
-        deletedCount = await deleteRoomCategoriesClientSide(categories);
+        // No Functions available (Spark/manual mode): apply immediate cleanup
+        // so UX matches the selected categories and does not get stuck on
+        // "eligible: 0" retention-only filters.
+        deletedCount = await deleteRoomCategoriesClientSide(categories, {
+          respectRetention: false,
+        });
       }
     }
 
