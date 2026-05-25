@@ -870,6 +870,33 @@ tbody tr:hover {
   padding: 0 32px;
 }
 
+.banner-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.banner-action-button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(66, 80, 179, 0.28);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--accent-strong);
+  font-weight: 700;
+  box-shadow: 0 10px 18px rgba(66, 80, 179, 0.18);
+}
+
+.banner-action-button .button-icon {
+  font-size: 14px;
+}
+
+.banner-action-button:hover:not(:disabled) {
+  border-color: rgba(66, 80, 179, 0.48);
+  background: #ffffff;
+  box-shadow: 0 14px 24px rgba(66, 80, 179, 0.24);
+}
+
 .banner-stat {
   display: flex;
   flex-direction: column;
@@ -897,7 +924,7 @@ tbody tr:hover {
   width: 14px;
   height: 14px;
   flex: 0 0 14px;
-  margin-left: auto;
+  margin-left: 8px;
 }
 
 .banner-pulse-dot {
@@ -994,6 +1021,32 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 
+  .top-banner {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .banner-brand {
+    border-right: 0;
+    padding-right: 0;
+    flex: 1 1 100%;
+  }
+
+  .banner-stats {
+    flex: 1 1 100%;
+    padding: 0;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .banner-controls {
+    margin-left: 0;
+  }
+
+  .banner-pulse {
+    margin-left: 0;
+  }
+
   .panel-toolbar {
     grid-template-columns: 1fr;
     min-width: 0;
@@ -1031,5 +1084,14 @@ tbody tr:hover {
 
   .answer-row {
     grid-template-columns: 62px 1fr auto;
+  }
+
+  .banner-controls {
+    width: 100%;
+  }
+
+  .banner-action-button {
+    flex: 1;
+    justify-content: center;
   }
 }

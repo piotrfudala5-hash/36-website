@@ -5,28 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>36stopni Admin Dashboard, Monetyzacja i Crashlytics</title>
     <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg?v=20260506-1" />
-    <link rel="stylesheet" href="./src/styles.css?v=20260525-8" />
+    <link rel="stylesheet" href="./src/styles.css?v=20260525-9" />
   </head>
   <body>
     <div class="page-shell">
-      <header class="hero-card">
-        <div>
-          <p class="eyebrow">Panel admina</p>
-          <h1>Statystyki 36stopni</h1>
-          <p class="hero-copy">
-            Prywatny dashboard do odczytu sesji gry, statystyk monetyzacji oraz zgłoszeń Crashlytics.
-          </p>
-        </div>
-        <div class="hero-actions">
-          <button id="refreshButton" class="ghost-button" disabled>
-            <span class="button-label"><span class="button-icon" aria-hidden="true">🔄</span>Odśwież</span>
-          </button>
-          <button id="logoutButton" class="ghost-button" hidden>
-            <span class="button-label"><span class="button-icon" aria-hidden="true">🚪</span>Wyloguj</span>
-          </button>
-        </div>
-      </header>
-
       <section class="hero-banner-card" aria-label="Baner STAT_APP">
         <img
           src="./assets/statapp-banner-20260525.png"
@@ -58,6 +40,14 @@
             <span class="banner-stat-label">Ostatnie odświeżenie</span>
             <span class="banner-stat-value" id="bannerLastRefresh">—</span>
           </div>
+        </div>
+        <div class="banner-controls">
+          <button id="refreshButton" class="ghost-button banner-action-button" disabled>
+            <span class="button-label"><span class="button-icon" aria-hidden="true">🔄</span>Odśwież</span>
+          </button>
+          <button id="logoutButton" class="ghost-button banner-action-button" hidden>
+            <span class="button-label"><span class="button-icon" aria-hidden="true">🚪</span>Wyloguj</span>
+          </button>
         </div>
         <div class="banner-pulse" aria-hidden="true">
           <span class="banner-pulse-dot"></span>
