@@ -152,6 +152,10 @@ const modesTableTitle = document.getElementById('modesTableTitle');
 const modesTableCountHeader = document.getElementById('modesTableCountHeader');
 const modesTableShareHeader = document.getElementById('modesTableShareHeader');
 const modesTableDateHeader = document.getElementById('modesTableDateHeader');
+const modeSelectVisibleButton = document.getElementById('modeSelectVisibleButton');
+const modeClearSelectionButton = document.getElementById('modeClearSelectionButton');
+const modeDeleteSelectedButton = document.getElementById('modeDeleteSelectedButton');
+const modeManageMessage = document.getElementById('modeManageMessage');
 const analyticsTotalEventsCount = document.getElementById('analyticsTotalEventsCount');
 const analyticsEventTypesCount = document.getElementById('analyticsEventTypesCount');
 const analyticsModeOpenCount = document.getElementById('analyticsModeOpenCount');
@@ -260,6 +264,10 @@ let mpCleanupBusy = false;
 let iaRowsCache = [];
 let iaSelectedDocIds = new Set();
 let iaManageBusy = false;
+let modeSummaryCache = emptyModeSummary();
+let modeDiagnosticsCache = { sessionDocs: 0, modeStatDocs: 0, analyticsModeDocs: 0 };
+let modeSelectedDocIds = new Set();
+let modeManageBusy = false;
 const MP_COMPLETED_RETENTION_MS = 2 * 60 * 60 * 1000;
 const MP_ABANDONED_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -380,6 +388,60 @@ mpDeleteSelectedButton?.addEventListener('click', async () => {
 
 mpDeleteSelectedManualButton?.addEventListener('click', async () => {
   await handleDeleteSelectedRoomCategories({ forceClientSide: true });
+});
+
+modeSelectVisibleButton?.addEventListener('click', () => {
+  if (modeManageBusy) return;
+  if (modeSummaryCache.source !== 'mode-stats') {
+    setModeManageMessage('Kasowanie i selekcja dziala tylko dla zrodla mode_play_stats.', 'error');
+    return;
+  }
+
+  const visibleModes = getVisibleModeRows();
+  for (const modeRow of visibleModes) {
+    for (const docId of modeRow.docIds || []) {
+      if (docId) modeSelectedDocIds.add(docId);
+    }
+  }
+
+  renderModeManagementPanel();
+  setModeManageMessage(`Zaznaczono ${modeSelectedDocIds.size} rekordow.`, 'success');
+});
+
+modeClearSelectionButton?.addEventListener('click', () => {
+  if (modeManageBusy) return;
+  modeSelectedDocIds.clear();
+  renderModeManagementPanel();
+  setModeManageMessage('Wyczyszczono zaznaczenie trybow.');
+});
+
+modeDeleteSelectedButton?.addEventListener('click', async () => {
+  await handleDeleteSelectedModes();
+});
+
+modesTableBody?.addEventListener('change', (event) => {
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement)) return;
+  if (!target.classList.contains('mode-row-select')) return;
+
+  const modeKey = String(target.dataset.modeKey || '').trim();
+  if (!modeKey) return;
+
+  const modeRow = modeSummaryCache.modes.find((row) => row.mode === modeKey);
+  if (!modeRow) return;
+
+  const docIds = modeRow.docIds || [];
+  if (target.checked) {
+    for (const docId of docIds) {
+      if (docId) modeSelectedDocIds.add(docId);
+    }
+  } else {
+    for (const docId of docIds) {
+      modeSelectedDocIds.delete(docId);
+    }
+  }
+
+  refreshModeSelectionState();
 });
 
 iaOnlyCustomToggle?.addEventListener('change', () => {
@@ -538,11 +600,10 @@ async function loadDashboard() {
       renderAnalyticsTable([]);
       analyticsDocsCountValue.textContent = '0';
     } else if (activeDashboard === 'modes') {
-      renderModeSummary(emptyModeSummary(), {
-        sessionDocs: 0,
-        modeStatDocs: 0,
-        analyticsModeDocs: 0,
-      });
+      modeSummaryCache = emptyModeSummary();
+      modeDiagnosticsCache = { sessionDocs: 0, modeStatDocs: 0, analyticsModeDocs: 0 };
+      modeSelectedDocIds.clear();
+      renderModeManagementPanel();
       modesDocsCountValue.textContent = '0';
     } else if (activeDashboard === 'games') {
       renderStats([]);
@@ -858,11 +919,14 @@ async function loadModesDashboard() {
     }
   }
 
-  renderModeSummary(modeSummary, {
+  modeSummaryCache = modeSummary;
+  modeDiagnosticsCache = {
     sessionDocs: 0,
     modeStatDocs,
     analyticsModeDocs,
-  });
+  };
+  pruneModeSelection();
+  renderModeManagementPanel();
   modesDocsCountValue.textContent = String(docsCount);
 }
 
@@ -1024,6 +1088,109 @@ function renderModeSummary(modeSummary, diagnostics = {}) {
   modesSourceValue.textContent = describeModeSource(modeSummary, diagnostics);
   renderModeBreakdown(modeSummary.modes, Math.max(modeSummary.sessionsWithMode, 1), modeSummary.source);
   renderModesTable(modeSummary.modes, Math.max(modeSummary.sessionsWithMode, 1), modeSummary.source);
+}
+
+function getVisibleModeRows() {
+  return modeSummaryCache?.modes || [];
+}
+
+function pruneModeSelection() {
+  const validIds = new Set();
+  for (const modeRow of getVisibleModeRows()) {
+    for (const docId of modeRow.docIds || []) {
+      if (docId) validIds.add(docId);
+    }
+  }
+
+  modeSelectedDocIds = new Set([...modeSelectedDocIds].filter((docId) => validIds.has(docId)));
+}
+
+function setModeManageMessage(text, tone = 'muted') {
+  if (!modeManageMessage) return;
+  modeManageMessage.textContent = text || '';
+  modeManageMessage.classList.remove('mp-cleanup-error', 'mp-cleanup-success');
+  if (tone === 'error') modeManageMessage.classList.add('mp-cleanup-error');
+  if (tone === 'success') modeManageMessage.classList.add('mp-cleanup-success');
+}
+
+function setModeManageBusy(busy) {
+  modeManageBusy = busy;
+  if (modeSelectVisibleButton) modeSelectVisibleButton.disabled = busy;
+  if (modeClearSelectionButton) modeClearSelectionButton.disabled = busy;
+  if (modeDeleteSelectedButton) modeDeleteSelectedButton.disabled = busy;
+}
+
+function refreshModeSelectionState() {
+  if (!modeManageMessage) return;
+  if (modeManageBusy) return;
+
+  const visibleModes = getVisibleModeRows();
+  if (modeSummaryCache.source !== 'mode-stats') {
+    modeManageMessage.textContent = `Tryb tylko do odczytu. Aktywne zrodlo: ${modeSummaryCache.source}.`;
+    modeManageMessage.classList.remove('mp-cleanup-error', 'mp-cleanup-success');
+    return;
+  }
+
+  const selectableRows = visibleModes.filter((modeRow) => (modeRow.docIds || []).length > 0);
+  const selectedVisible = selectableRows.filter((modeRow) => (modeRow.docIds || []).some((docId) => modeSelectedDocIds.has(docId))).length;
+  if (!modeSelectedDocIds.size) {
+    modeManageMessage.textContent = `Widoczne tryby: ${visibleModes.length}. Zaznaczone: 0.`;
+    modeManageMessage.classList.remove('mp-cleanup-error', 'mp-cleanup-success');
+    return;
+  }
+
+  modeManageMessage.textContent = `Widoczne tryby: ${visibleModes.length}. Zaznaczone tryby: ${selectedVisible}. Zaznaczone rekordy: ${modeSelectedDocIds.size}.`;
+  modeManageMessage.classList.remove('mp-cleanup-error', 'mp-cleanup-success');
+}
+
+function renderModeManagementPanel() {
+  renderModeSummary(modeSummaryCache, modeDiagnosticsCache);
+  refreshModeSelectionState();
+}
+
+async function handleDeleteSelectedModes() {
+  if (modeManageBusy) return;
+  if (modeSummaryCache.source !== 'mode-stats') {
+    setModeManageMessage('Usuwanie trybow jest dostepne tylko dla danych mode_play_stats.', 'error');
+    return;
+  }
+
+  const selectedDocIds = [...modeSelectedDocIds].filter(Boolean);
+  if (!selectedDocIds.length) {
+    setModeManageMessage('Zaznacz co najmniej jeden rekord trybu do usuniecia.', 'error');
+    return;
+  }
+
+  const ok = window.confirm(`Usunac zaznaczone rekordy trybow (${selectedDocIds.length}) z mode_play_stats?`);
+  if (!ok) return;
+
+  try {
+    setModeManageBusy(true);
+    setModeManageMessage('Usuwanie zaznaczonych rekordow trybow...');
+
+    const collectionName = dashboardCollections.modeStats;
+    if (!collectionName) {
+      throw new Error('Nie skonfigurowano kolekcji mode_play_stats.');
+    }
+
+    for (const chunk of chunkArray(selectedDocIds, 350)) {
+      const batch = writeBatch(db);
+      for (const docId of chunk) {
+        batch.delete(doc(db, collectionName, docId));
+      }
+      await batch.commit();
+    }
+
+    modeSelectedDocIds.clear();
+    await loadModesDashboard();
+    setModeManageMessage(`Usunieto rekordow: ${selectedDocIds.length}.`, 'success');
+  } catch (error) {
+    console.error('[MODE_STATS] delete failed:', error);
+    setModeManageMessage(`Nie udalo sie usunac rekordow: ${error?.message || error}`, 'error');
+  } finally {
+    setModeManageBusy(false);
+    refreshModeSelectionState();
+  }
 }
 
 function renderAnalyticsStats(rows) {
@@ -1204,6 +1371,7 @@ function summarizeModeStatRows(rows) {
       openCount: 0,
       playCount: 0,
       latestRaw: null,
+      docIds: [],
     };
 
     current.count += count;
@@ -1212,6 +1380,11 @@ function summarizeModeStatRows(rows) {
     const rawPlayCount = toNumber(pickValue(row, [['playCount'], ['play_count']])) || 0;
     current.openCount += rawOpenCount;
     current.playCount += rawPlayCount;
+
+    const docId = String(row.id || '').trim();
+    if (docId && !current.docIds.includes(docId)) {
+      current.docIds.push(docId);
+    }
 
     const latestRaw = pickValue(row, [
       ['lastSeen'],
@@ -1307,7 +1480,7 @@ function renderModeBreakdown(sortedModes, totalSessions, source) {
 
 function renderModesTable(modes, totalSessions, source) {
   if (!modes.length) {
-    modesTableBody.innerHTML = `<tr><td colspan="4" class="empty-row">${escapeHtml(modeSourceLabels(source).emptyTable)}</td></tr>`;
+    modesTableBody.innerHTML = `<tr><td colspan="5" class="empty-row">${escapeHtml(modeSourceLabels(source).emptyTable)}</td></tr>`;
     return;
   }
 
@@ -1316,13 +1489,28 @@ function renderModesTable(modes, totalSessions, source) {
 
   modesTableBody.innerHTML = modes
     .map((summary) => {
+      const docIds = summary.docIds || [];
+      const canSelect = isModeStats && docIds.length > 0;
+      const isSelected = canSelect && docIds.every((docId) => modeSelectedDocIds.has(docId));
+      const selectCell = canSelect
+        ? `
+            <input
+              type="checkbox"
+              class="mode-row-select"
+              data-mode-key="${escapeHtml(summary.mode)}"
+              ${isSelected ? 'checked' : ''}
+            />
+          `
+        : '<span class="table-note">-</span>';
+
       if (isModeStats && (summary.openCount > 0 || summary.playCount > 0)) {
         const opens = summary.openCount;
         const plays = summary.playCount;
         const convPct = opens > 0 ? Math.round((plays / opens) * 100) : 0;
-        const playsLabel = plays === 1 ? '1 start' : plays < 5 ? `${plays} starty` : `${plays} startów`;
+        const playsLabel = plays === 1 ? '1 start' : plays < 5 ? `${plays} starty` : `${plays} startow`;
         return `
           <tr>
+            <td>${selectCell}</td>
             <td>${escapeHtml(modeLabel(summary.mode))}</td>
             <td>${opens}</td>
             <td>${convPct}% <span class="cell-sub">(${playsLabel})</span></td>
@@ -1334,6 +1522,7 @@ function renderModesTable(modes, totalSessions, source) {
       const percentage = Math.round((summary.count / totalSessions) * 100);
       return `
         <tr>
+          <td>${selectCell}</td>
           <td>${escapeHtml(modeLabel(summary.mode))}</td>
           <td>${summary.count} ${countLabel(summary.count)}</td>
           <td>${percentage}%</td>

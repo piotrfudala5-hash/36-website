@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>36stopni Admin Dashboard, Monetyzacja i Crashlytics</title>
     <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg?v=20260506-1" />
-    <link rel="stylesheet" href="./src/styles.css?v=20260525-6" />
+    <link rel="stylesheet" href="./src/styles.css?v=20260525-7" />
   </head>
   <body>
     <div class="page-shell">
@@ -18,8 +18,12 @@
           </p>
         </div>
         <div class="hero-actions">
-          <button id="refreshButton" class="ghost-button" disabled>Odśwież</button>
-          <button id="logoutButton" class="ghost-button" hidden>Wyloguj</button>
+          <button id="refreshButton" class="ghost-button" disabled>
+            <span class="button-label"><span class="button-icon" aria-hidden="true">🔄</span>Odśwież</span>
+          </button>
+          <button id="logoutButton" class="ghost-button" hidden>
+            <span class="button-label"><span class="button-icon" aria-hidden="true">🚪</span>Wyloguj</span>
+          </button>
         </div>
       </header>
 
@@ -108,7 +112,7 @@
                 aria-selected="true"
                 aria-controls="gamesPanel"
               >
-                <span class="tab-title">Statystyki gry</span>
+                <span class="tab-title"><span class="tab-icon" aria-hidden="true">📊</span>Statystyki gry</span>
                 <span class="tab-subtitle">Sesje, odpowiedzi i wyniki</span>
               </button>
               <button
@@ -119,7 +123,7 @@
                 aria-selected="false"
                 aria-controls="modesPanel"
               >
-                <span class="tab-title">Tryby gry</span>
+                <span class="tab-title"><span class="tab-icon" aria-hidden="true">🎮</span>Tryby gry</span>
                 <span class="tab-subtitle">Popularność i udział sesji</span>
               </button>
               <button
@@ -130,7 +134,7 @@
                 aria-selected="false"
                 aria-controls="analyticsPanel"
               >
-                <span class="tab-title">Monetyzacja</span>
+                <span class="tab-title"><span class="tab-icon" aria-hidden="true">💰</span>Monetyzacja</span>
                 <span class="tab-subtitle">Paywall, zakupy, rewarded i interstitiale</span>
               </button>
               <button
@@ -141,7 +145,7 @@
                 aria-selected="false"
                 aria-controls="crashlyticsPanel"
               >
-                <span class="tab-title">Crashlytics</span>
+                <span class="tab-title"><span class="tab-icon" aria-hidden="true">🧯</span>Crashlytics</span>
                 <span class="tab-subtitle">Issue, fatale i wersje aplikacji</span>
               </button>
               <button
@@ -152,7 +156,7 @@
                 aria-selected="false"
                 aria-controls="executiveSummaryPanel"
               >
-                <span class="tab-title">Podsumowanie</span>
+                <span class="tab-title"><span class="tab-icon" aria-hidden="true">🧭</span>Podsumowanie</span>
                 <span class="tab-subtitle">KPIs na jeden rzut oka</span>
               </button>
               <button
@@ -163,7 +167,7 @@
                 aria-selected="false"
                 aria-controls="adsPerformancePanel"
               >
-                <span class="tab-title">Reklamy</span>
+                <span class="tab-title"><span class="tab-icon" aria-hidden="true">📢</span>Reklamy</span>
                 <span class="tab-subtitle">Performance placement i konwersje</span>
               </button>
               <button
@@ -174,7 +178,7 @@
                 aria-selected="false"
                 aria-controls="engagementPanel"
               >
-                <span class="tab-title">Zaangażowanie</span>
+                <span class="tab-title"><span class="tab-icon" aria-hidden="true">🔥</span>Zaangażowanie</span>
                 <span class="tab-subtitle">DAU, sesje i retencja</span>
               </button>
               <button
@@ -185,7 +189,7 @@
                 aria-selected="false"
                 aria-controls="qualityPanel"
               >
-                <span class="tab-title">Jakość</span>
+                <span class="tab-title"><span class="tab-icon" aria-hidden="true">✅</span>Jakość</span>
                 <span class="tab-subtitle">Crashe i wydajność</span>
               </button>
               <button
@@ -196,7 +200,7 @@
                 aria-selected="false"
                 aria-controls="multiphonePanel"
               >
-                <span class="tab-title">Karty Wariata</span>
+                <span class="tab-title"><span class="tab-icon" aria-hidden="true">🃏</span>Karty Wariata</span>
                 <span class="tab-subtitle">Multi-phone, pokoje, awarie</span>
               </button>
               <button
@@ -207,7 +211,7 @@
                 aria-selected="false"
                 aria-controls="individualAnswersPanel"
               >
-                <span class="tab-title">Odpowiedzi indywidualne</span>
+                <span class="tab-title"><span class="tab-icon" aria-hidden="true">✍️</span>Odpowiedzi indywidualne</span>
                 <span class="tab-subtitle">Wizja + odpowiedź per gracz</span>
               </button>
               <button
@@ -218,7 +222,7 @@
                 aria-selected="false"
                 aria-controls="releasesPanel"
               >
-                <span class="tab-title">Release Insights</span>
+                <span class="tab-title"><span class="tab-icon" aria-hidden="true">🚀</span>Release Insights</span>
                 <span class="tab-subtitle">Wersje, adopcja, regresje</span>
               </button>
             </div>
@@ -426,6 +430,30 @@
               </section>
             </div>
 
+            <section class="panel-card">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Zarządzanie danymi</p>
+                  <h2>Selekcja trybów do rozwoju</h2>
+                </div>
+              </div>
+              <p class="table-note">
+                Kasowanie działa tylko dla źródła <code>mode_play_stats</code>.
+              </p>
+              <div class="panel-toolbar">
+                <button id="modeSelectVisibleButton" type="button" class="ghost-button">
+                  <span class="button-label"><span class="button-icon" aria-hidden="true">✅</span>Zaznacz widoczne</span>
+                </button>
+                <button id="modeClearSelectionButton" type="button" class="ghost-button">
+                  <span class="button-label"><span class="button-icon" aria-hidden="true">🧹</span>Wyczyść zaznaczenie</span>
+                </button>
+                <button id="modeDeleteSelectedButton" type="button" class="ghost-button">
+                  <span class="button-label"><span class="button-icon" aria-hidden="true">🗑️</span>Usuń zaznaczone</span>
+                </button>
+              </div>
+              <p id="modeManageMessage" class="table-note"></p>
+            </section>
+
             <section class="panel-card table-card">
               <div class="panel-header">
                 <div>
@@ -438,6 +466,7 @@
                 <table>
                   <thead>
                     <tr>
+                      <th>Wybór</th>
                       <th>Tryb</th>
                       <th id="modesTableCountHeader">Sesje</th>
                       <th id="modesTableShareHeader">Udział</th>
@@ -446,7 +475,7 @@
                   </thead>
                   <tbody id="modesTableBody">
                     <tr>
-                      <td colspan="4" class="empty-row">Brak danych o trybach</td>
+                      <td colspan="5" class="empty-row">Brak danych o trybach</td>
                     </tr>
                   </tbody>
                 </table>
@@ -979,9 +1008,15 @@
                   </label>
                 </div>
                 <div class="panel-toolbar">
-                  <button id="mpDeleteSelectedButton" type="button" class="ghost-button">Usuń wybrane</button>
-                  <button id="mpDeleteSelectedManualButton" type="button" class="ghost-button">Ręczne czyszczenie</button>
-                  <button id="mpReloadBucketsButton" type="button" class="ghost-button">Odśwież statusy</button>
+                  <button id="mpDeleteSelectedButton" type="button" class="ghost-button">
+                    <span class="button-label"><span class="button-icon" aria-hidden="true">🗑️</span>Usuń wybrane</span>
+                  </button>
+                  <button id="mpDeleteSelectedManualButton" type="button" class="ghost-button">
+                    <span class="button-label"><span class="button-icon" aria-hidden="true">🛠️</span>Ręczne czyszczenie</span>
+                  </button>
+                  <button id="mpReloadBucketsButton" type="button" class="ghost-button">
+                    <span class="button-label"><span class="button-icon" aria-hidden="true">🔄</span>Odśwież statusy</span>
+                  </button>
                 </div>
                 <p class="table-note">
                   Ręczne czyszczenie działa bez Cloud Functions (plan Spark), ale wymaga uprawnień admina w Firestore Rules i usuwa zaznaczone kategorie od razu (bez TTL).
@@ -1079,9 +1114,15 @@
                 </label>
               </div>
               <div class="panel-toolbar">
-                <button id="iaSelectVisibleButton" type="button" class="ghost-button">Zaznacz widoczne</button>
-                <button id="iaClearSelectionButton" type="button" class="ghost-button">Wyczyść zaznaczenie</button>
-                <button id="iaDeleteSelectedButton" type="button" class="ghost-button">Usuń zaznaczone</button>
+                <button id="iaSelectVisibleButton" type="button" class="ghost-button">
+                  <span class="button-label"><span class="button-icon" aria-hidden="true">✅</span>Zaznacz widoczne</span>
+                </button>
+                <button id="iaClearSelectionButton" type="button" class="ghost-button">
+                  <span class="button-label"><span class="button-icon" aria-hidden="true">🧹</span>Wyczyść zaznaczenie</span>
+                </button>
+                <button id="iaDeleteSelectedButton" type="button" class="ghost-button">
+                  <span class="button-label"><span class="button-icon" aria-hidden="true">🗑️</span>Usuń zaznaczone</span>
+                </button>
               </div>
               <p id="iaManageMessage" class="table-note"></p>
             </section>
@@ -1289,6 +1330,6 @@
       </main>
     </div>
 
-    <script type="module" src="./src/app.js?v=20260525-6"></script>
+    <script type="module" src="./src/app.js?v=20260525-7"></script>
   </body>
 </html>
