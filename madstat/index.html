@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>36stopni Admin Dashboard, Monetyzacja i Crashlytics</title>
     <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg?v=20260506-1" />
-    <link rel="stylesheet" href="./src/styles.css?v=20260525-1" />
+    <link rel="stylesheet" href="./src/styles.css?v=20260525-2" />
   </head>
   <body>
     <div class="page-shell">
@@ -980,8 +980,12 @@
                 </div>
                 <div class="panel-toolbar">
                   <button id="mpDeleteSelectedButton" type="button" class="ghost-button">Usuń wybrane</button>
+                  <button id="mpDeleteSelectedManualButton" type="button" class="ghost-button">Ręczne czyszczenie</button>
                   <button id="mpReloadBucketsButton" type="button" class="ghost-button">Odśwież statusy</button>
                 </div>
+                <p class="table-note">
+                  Ręczne czyszczenie działa bez Cloud Functions (plan Spark), ale wymaga uprawnień admina w Firestore Rules.
+                </p>
                 <p id="mpCleanupMessage" class="table-note"></p>
               </section>
 
@@ -1263,6 +1267,6 @@
       </main>
     </div>
 
-    <script type="module" src="./src/app.js?v=20260525-1"></script>
+    <script type="module" src="./src/app.js?v=20260525-2"></script>
   </body>
 </html>

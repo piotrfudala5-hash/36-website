@@ -8,6 +8,9 @@ import {
 } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js';
 import {
   collection,
+  collectionGroup,
+  deleteDoc,
+  doc,
   documentId,
   getDocs,
   getFirestore,
@@ -15,6 +18,8 @@ import {
   orderBy,
   query,
   startAfter,
+  where,
+  writeBatch,
 } from 'https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js';
 import {
   getFunctions,
@@ -86,6 +91,7 @@ const mpDeleteOngoing = document.getElementById('mpDeleteOngoing');
 const mpDeleteCompletedEligible = document.getElementById('mpDeleteCompletedEligible');
 const mpDeleteAbandonedEligible = document.getElementById('mpDeleteAbandonedEligible');
 const mpDeleteSelectedButton = document.getElementById('mpDeleteSelectedButton');
+const mpDeleteSelectedManualButton = document.getElementById('mpDeleteSelectedManualButton');
 const mpReloadBucketsButton = document.getElementById('mpReloadBucketsButton');
 const mpCleanupMessage = document.getElementById('mpCleanupMessage');
 const mpTopCrashList = document.getElementById('mpTopCrashList');
@@ -246,6 +252,8 @@ let activeDashboard = restoreActiveDashboard();
 let crashRowsCache = [];
 let mpRoomStatsCache = null;
 let mpCleanupBusy = false;
+const MP_COMPLETED_RETENTION_MS = 2 * 60 * 60 * 1000;
+const MP_ABANDONED_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 
 adminEmailValue.textContent = adminAccess.email;
 modesAdminEmailValue.textContent = adminAccess.email;
@@ -360,6 +368,10 @@ mpReloadBucketsButton?.addEventListener('click', async () => {
 
 mpDeleteSelectedButton?.addEventListener('click', async () => {
   await handleDeleteSelectedRoomCategories();
+});
+
+mpDeleteSelectedManualButton?.addEventListener('click', async () => {
+  await handleDeleteSelectedRoomCategories({ forceClientSide: true });
 });
 
 onAuthStateChanged(auth, async (user) => {
@@ -3195,6 +3207,7 @@ function setMultiphoneCleanupMessage(text, tone = 'muted') {
 function setMultiphoneCleanupBusy(busy) {
   mpCleanupBusy = busy;
   if (mpDeleteSelectedButton) mpDeleteSelectedButton.disabled = busy;
+  if (mpDeleteSelectedManualButton) mpDeleteSelectedManualButton.disabled = busy;
   if (mpReloadBucketsButton) mpReloadBucketsButton.disabled = busy;
 }
 
@@ -3229,6 +3242,256 @@ function mapRoomStatsSampleToRows(sampledRooms) {
   }));
 }
 
+function toInt(value, fallback = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.trunc(n) : fallback;
+}
+
+function normalizeKwRoomStatus(value) {
+  const status = String(value || '').trim().toLowerCase();
+  if (status === 'in_progress') return 'inprogress';
+  if (status === 'active') return 'inprogress';
+  return status || 'unknown';
+}
+
+function roomBucketFromStatus(status) {
+  if (status === 'completed') return 'completed';
+  if (status === 'abandoned' || status === 'closed') return 'abandoned';
+  if (status === 'lobby' || status === 'inprogress') return 'ongoing';
+  return 'unknown';
+}
+
+function kwRoomUpdatedAtMs(snapshotData) {
+  const direct = toInt(snapshotData?.updatedAtMs, 0);
+  if (direct > 0) return direct;
+  return toInt(snapshotData?.gameState?.updatedAtMs, 0);
+}
+
+function kwRoomIdFromSnapshotDoc(docSnap, snapshotData) {
+  const explicit = String(snapshotData?.roomId || '').trim();
+  if (explicit) return explicit;
+  const parts = String(docSnap?.ref?.path || '').split('/');
+  if (parts.length >= 2 && parts[0] === 'kw_rooms') {
+    return String(parts[1] || '').trim();
+  }
+  return '';
+}
+
+function computeRoomSummary(snapshotData, roomId) {
+  const status = normalizeKwRoomStatus(snapshotData?.status);
+  const bucket = roomBucketFromStatus(status);
+  const updatedAtMs = kwRoomUpdatedAtMs(snapshotData);
+
+  const players = Array.isArray(snapshotData?.players) ? snapshotData.players : [];
+  const playerCount = players.length;
+  const hostPlayerId = String(snapshotData?.hostPlayerId || '').trim();
+  const host = players.find((p) => String(p?.playerId || '').trim() === hostPlayerId);
+  const hostDisplayName = String(host?.displayName || '').trim();
+
+  return {
+    roomId,
+    roomCode: String(snapshotData?.roomCode || '').trim(),
+    status,
+    bucket,
+    updatedAtMs,
+    playerCount,
+    hostDisplayName,
+    totalRounds: toInt(snapshotData?.gameState?.totalRounds, 0),
+    roundIndex: toInt(snapshotData?.gameState?.currentRoundIndex, 0),
+  };
+}
+
+function eligibleRetentionCategory(summary, now) {
+  if (!summary || summary.updatedAtMs <= 0) return null;
+  const ageMs = now - summary.updatedAtMs;
+  if (summary.status === 'completed' && ageMs >= MP_COMPLETED_RETENTION_MS) {
+    return 'completed';
+  }
+  if ((summary.status === 'abandoned' || summary.status === 'closed') &&
+      ageMs >= MP_ABANDONED_RETENTION_MS) {
+    return 'abandoned';
+  }
+  return null;
+}
+
+function bucketCountersFromSummaries(summaries) {
+  const counters = {
+    total: 0,
+    ongoing: 0,
+    completed: 0,
+    abandoned: 0,
+    unknown: 0,
+  };
+  for (const summary of summaries) {
+    counters.total += 1;
+    if (summary.bucket === 'ongoing') counters.ongoing += 1;
+    else if (summary.bucket === 'completed') counters.completed += 1;
+    else if (summary.bucket === 'abandoned') counters.abandoned += 1;
+    else counters.unknown += 1;
+  }
+  return counters;
+}
+
+function eligibleCountersFromSummaries(summaries, now) {
+  const counters = { completed: 0, abandoned: 0 };
+  for (const summary of summaries) {
+    const category = eligibleRetentionCategory(summary, now);
+    if (category === 'completed') counters.completed += 1;
+    if (category === 'abandoned') counters.abandoned += 1;
+  }
+  return counters;
+}
+
+function selectSummariesForDelete({ summaries, categories, now, forceOngoing = false }) {
+  const requested = new Set(
+    (Array.isArray(categories) ? categories : [])
+      .map((v) => String(v || '').trim().toLowerCase())
+      .filter(Boolean),
+  );
+  const allowCompleted = requested.has('completed');
+  const allowAbandoned = requested.has('abandoned');
+  const allowOngoing = requested.has('ongoing');
+  const selected = [];
+
+  for (const summary of summaries) {
+    const retentionCategory = eligibleRetentionCategory(summary, now);
+    if (allowCompleted && retentionCategory === 'completed') {
+      selected.push(summary);
+      continue;
+    }
+    if (allowAbandoned && retentionCategory === 'abandoned') {
+      selected.push(summary);
+      continue;
+    }
+    if (allowOngoing && forceOngoing && summary.bucket === 'ongoing') {
+      selected.push(summary);
+    }
+  }
+  return selected;
+}
+
+async function loadAllRoomSummariesClientSide() {
+  const summaries = [];
+  let docs = [];
+  try {
+    const onlyCurrent = await getDocs(
+      query(collectionGroup(db, 'snapshots'), where(documentId(), '==', 'current')),
+    );
+    docs = onlyCurrent.docs;
+  } catch (error) {
+    console.warn('[KW_STATS] fallback collectionGroup scan:', error);
+    const everySnapshot = await getDocs(query(collectionGroup(db, 'snapshots')));
+    docs = everySnapshot.docs.filter((docSnap) => docSnap.id === 'current');
+  }
+
+  for (const docSnap of docs) {
+    if (docSnap.id !== 'current') continue;
+    const data = docSnap.data() || {};
+    const roomId = kwRoomIdFromSnapshotDoc(docSnap, data);
+    if (!roomId) continue;
+    summaries.push(computeRoomSummary(data, roomId));
+  }
+  return summaries;
+}
+
+function buildClientRoomStats(summaries) {
+  const now = Date.now();
+  const counts = bucketCountersFromSummaries(summaries);
+  const eligibleForDeletion = eligibleCountersFromSummaries(summaries, now);
+  const sampledRooms = summaries
+    .slice()
+    .sort((a, b) => b.updatedAtMs - a.updatedAtMs)
+    .slice(0, 200);
+
+  return {
+    generatedAtMs: now,
+    retentionPolicy: {
+      completedTtlMs: MP_COMPLETED_RETENTION_MS,
+      abandonedTtlMs: MP_ABANDONED_RETENTION_MS,
+    },
+    counts,
+    eligibleForDeletion,
+    sampledRooms,
+  };
+}
+
+function chunkArray(items, chunkSize = 400) {
+  const chunks = [];
+  for (let i = 0; i < items.length; i += chunkSize) {
+    chunks.push(items.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
+
+async function deleteDocsInBatches(docSnapshots) {
+  if (!Array.isArray(docSnapshots) || docSnapshots.length === 0) return;
+  for (const chunk of chunkArray(docSnapshots, 350)) {
+    const batch = writeBatch(db);
+    for (const docSnap of chunk) {
+      batch.delete(docSnap.ref);
+    }
+    await batch.commit();
+  }
+}
+
+async function deleteSubcollectionDocs(path) {
+  const colRef = collection(db, path);
+  while (true) {
+    const page = await getDocs(query(colRef, limit(350)));
+    if (page.empty) break;
+    await deleteDocsInBatches(page.docs);
+    if (page.size < 350) break;
+  }
+}
+
+async function deleteRoomCodeDocs(summary) {
+  if (summary.roomCode) {
+    await deleteDoc(doc(db, 'kw_room_codes', summary.roomCode)).catch(() => {});
+  }
+
+  const byRoomId = await getDocs(
+    query(collection(db, 'kw_room_codes'), where('roomId', '==', summary.roomId)),
+  );
+  if (!byRoomId.empty) {
+    await deleteDocsInBatches(byRoomId.docs);
+  }
+}
+
+async function deleteRoomArtifactsClientSide(summary) {
+  if (!summary?.roomId) return false;
+  await deleteSubcollectionDocs(`kw_rooms/${summary.roomId}/actions`);
+  await deleteSubcollectionDocs(`kw_rooms/${summary.roomId}/snapshots`);
+  await deleteRoomCodeDocs(summary);
+  await deleteDoc(doc(db, 'kw_rooms', summary.roomId)).catch(() => {});
+  return true;
+}
+
+async function refreshMultiphoneRoomStatsClientSide() {
+  const summaries = await loadAllRoomSummariesClientSide();
+  const stats = buildClientRoomStats(summaries);
+  mpRoomStatsCache = stats;
+  applyRoomStatsToMultiphoneStatus(stats);
+  return stats;
+}
+
+async function deleteRoomCategoriesClientSide(categories) {
+  const now = Date.now();
+  const forceOngoing = categories.includes('ongoing');
+  const summaries = await loadAllRoomSummariesClientSide();
+  const selected = selectSummariesForDelete({
+    summaries,
+    categories,
+    now,
+    forceOngoing,
+  });
+  let deletedCount = 0;
+  for (const summary of selected) {
+    const deleted = await deleteRoomArtifactsClientSide(summary);
+    if (deleted) deletedCount += 1;
+  }
+  return deletedCount;
+}
+
 async function refreshMultiphoneRoomStats({ force = false } = {}) {
   if (!force && mpRoomStatsCache) {
     return mpRoomStatsCache;
@@ -3237,17 +3500,27 @@ async function refreshMultiphoneRoomStats({ force = false } = {}) {
   try {
     const response = await kwRoomCategoryStatsCallable();
     const stats = response?.data || null;
+    if (!stats) throw new Error('kwRoomCategoryStats returned empty payload.');
     mpRoomStatsCache = stats;
     applyRoomStatsToMultiphoneStatus(stats);
     setMultiphoneCleanupMessage('');
     return stats;
   } catch (error) {
     console.warn('[KW_STATS] kwRoomCategoryStats unavailable:', error);
-    setMultiphoneCleanupMessage(
-      'Nie udalo sie pobrac statusow pokoi z backendu maintenance.',
-      'error',
-    );
-    return null;
+    try {
+      const stats = await refreshMultiphoneRoomStatsClientSide();
+      setMultiphoneCleanupMessage(
+        'Tryb reczny aktywny (bez Cloud Functions / Blaze).',
+      );
+      return stats;
+    } catch (fallbackError) {
+      console.error('[KW_STATS] client-side stats failed:', fallbackError);
+      setMultiphoneCleanupMessage(
+        'Nie udalo sie pobrac statusow pokoi.',
+        'error',
+      );
+      return null;
+    }
   }
 }
 
@@ -3259,7 +3532,7 @@ function selectedRoomCleanupCategories() {
   return categories;
 }
 
-async function handleDeleteSelectedRoomCategories() {
+async function handleDeleteSelectedRoomCategories({ forceClientSide = false } = {}) {
   if (mpCleanupBusy) return;
   const categories = selectedRoomCleanupCategories();
   if (!categories.length) {
@@ -3276,16 +3549,37 @@ async function handleDeleteSelectedRoomCategories() {
 
   try {
     setMultiphoneCleanupBusy(true);
-    setMultiphoneCleanupMessage('Usuwanie danych...');
-    const response = await kwRoomCategoryDeleteCallable({
-      categories,
-      dryRun: false,
-      forceOngoing: categories.includes('ongoing'),
-    });
-    const payload = response?.data || {};
-    const deletedCount = toNumber(payload.deletedCount);
     setMultiphoneCleanupMessage(
-      `Usunieto pokojow: ${deletedCount}.`,
+      forceClientSide
+        ? 'Reczne czyszczenie danych...'
+        : 'Usuwanie danych...',
+    );
+
+    let deletedCount = 0;
+    let usedClientSideFallback = forceClientSide;
+
+    if (forceClientSide) {
+      deletedCount = await deleteRoomCategoriesClientSide(categories);
+    } else {
+      try {
+        const response = await kwRoomCategoryDeleteCallable({
+          categories,
+          dryRun: false,
+          forceOngoing: categories.includes('ongoing'),
+        });
+        const payload = response?.data || {};
+        deletedCount = toNumber(payload.deletedCount);
+      } catch (callableError) {
+        console.warn('[KW_STATS] callable delete unavailable, using manual mode:', callableError);
+        usedClientSideFallback = true;
+        deletedCount = await deleteRoomCategoriesClientSide(categories);
+      }
+    }
+
+    setMultiphoneCleanupMessage(
+      usedClientSideFallback
+        ? `Usunieto pokojow recznie: ${deletedCount}.`
+        : `Usunieto pokojow: ${deletedCount}.`,
       'success',
     );
     mpRoomStatsCache = null;
