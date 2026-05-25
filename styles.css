@@ -379,54 +379,62 @@ h2 {
   margin-top: 28px;
 }
 
-.hero-points {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 24px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.hero-points li {
-  padding: 11px 15px;
-  border-radius: var(--radius-pill);
-  color: #fff;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  font-weight: 700;
-}
-
 .hero-mode-rail {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
-  margin-top: 28px;
+  margin-top: 24px;
 }
 
 .hero-mode-pill {
-  padding: 16px 16px 18px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: var(--shadow-sm);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 12px 26px rgba(4, 8, 14, 0.28);
+  backdrop-filter: blur(8px);
 }
 
-.hero-mode-pill span {
+.hero-mode-pill-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #1d2a42;
+  font-size: 18px;
+}
+
+.hero-mode-pill-copy {
+  min-width: 0;
+}
+
+.hero-mode-pill-copy span {
   display: block;
-  margin-bottom: 8px;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.74rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  margin-bottom: 5px;
 }
 
 .hero-mode-pill strong {
   display: block;
   color: #fff;
-  font-size: 1rem;
-  line-height: 1.3;
+  font-size: 1.02rem;
+  line-height: 1.22;
+}
+
+.hero-mode-pill-arrow {
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 1.3rem;
+  font-weight: 700;
 }
 
 .hero-mode-pill--rose {
@@ -1726,11 +1734,6 @@ h2 {
     min-height: 44px;
     padding: 0 14px;
     font-size: 0.92rem;
-  }
-
-  .hero-points {
-    flex-direction: column;
-    align-items: start;
   }
 
   .showcase-stack {
