@@ -135,7 +135,7 @@
                 aria-controls="analyticsPanel"
               >
                 <span class="tab-title"><span class="tab-icon" aria-hidden="true">💰</span>Monetyzacja</span>
-                <span class="tab-subtitle">Paywall, zakupy, rewarded i interstitiale</span>
+                <span class="tab-subtitle">Lejek: paywall -> zakup / reklama</span>
               </button>
               <button
                 id="crashlyticsTabButton"
@@ -229,6 +229,15 @@
           </section>
 
           <section id="gamesPanel" class="dashboard-panel">
+            <section class="panel-card panel-guide">
+              <p class="eyebrow">Przewodnik zakładki</p>
+              <ul class="panel-guide-list">
+                <li><strong>Co widzisz:</strong> jakość odpowiedzi i końcowe wyniki sesji.</li>
+                <li><strong>Jak czytać:</strong> KPI u góry, potem rozkład odpowiedzi, na końcu historia gier.</li>
+                <li><strong>Kiedy reagować:</strong> gdy rośnie "Oboje nie" lub spada liczba ukończonych gier.</li>
+              </ul>
+            </section>
+
             <div class="stats-grid">
               <article class="stat-card">
                 <p class="stat-label">Wszystkie gry</p>
@@ -371,6 +380,15 @@
           </section>
 
           <section id="modesPanel" class="dashboard-panel" hidden>
+            <section class="panel-card panel-guide">
+              <p class="eyebrow">Przewodnik zakładki</p>
+              <ul class="panel-guide-list">
+                <li><strong>Co widzisz:</strong> które tryby są wybierane najczęściej.</li>
+                <li><strong>Jak czytać:</strong> najpierw top tryb i udział, potem tabela z trendem.</li>
+                <li><strong>Kiedy reagować:</strong> gdy wybrany tryb traci udział lub liczba sesji spada.</li>
+              </ul>
+            </section>
+
             <div class="stats-grid">
               <article class="stat-card stat-card-wide">
                 <p class="stat-label">Najczęstszy tryb</p>
@@ -484,6 +502,15 @@
           </section>
 
           <section id="crashlyticsPanel" class="dashboard-panel" hidden>
+            <section class="panel-card panel-guide">
+              <p class="eyebrow">Przewodnik zakładki</p>
+              <ul class="panel-guide-list">
+                <li><strong>Co widzisz:</strong> błędy aplikacji i ich wpływ na graczy.</li>
+                <li><strong>Jak czytać:</strong> najpierw fatal issues, potem users affected, później lista issue.</li>
+                <li><strong>Kiedy reagować:</strong> gdy rosną fatale albo ten sam issue wraca po nowej wersji.</li>
+              </ul>
+            </section>
+
             <div class="stats-grid">
               <article class="stat-card">
                 <p class="stat-label">Wszystkie issue</p>
@@ -611,21 +638,30 @@
           </section>
 
           <section id="analyticsPanel" class="dashboard-panel" hidden>
+            <section class="panel-card panel-guide">
+              <p class="eyebrow">Przewodnik zakładki</p>
+              <ul class="panel-guide-list">
+                <li><strong>Grupa 1 - Paywall:</strong> eventy wejścia/wyjścia, czyli ilu użytkowników dociera do decyzji.</li>
+                <li><strong>Grupa 2 - Zakupy:</strong> eventy purchase/restore, czyli realna konwersja i przychód IAP.</li>
+                <li><strong>Grupa 3 - Reklamy:</strong> rewarded/interstitial, czyli monetyzacja IAA bez zakupu.</li>
+              </ul>
+            </section>
+
             <div class="stats-grid">
               <article class="stat-card">
-                <p class="stat-label">Wszystkie eventy</p>
+                <p class="stat-label">Wszystkie eventy monetyzacji</p>
                 <strong id="analyticsTotalEventsCount">0</strong>
               </article>
               <article class="stat-card">
-                <p class="stat-label">Wyświetlenia paywalla</p>
+                <p class="stat-label">Paywall: wejścia</p>
                 <strong id="analyticsEventTypesCount">0</strong>
               </article>
               <article class="stat-card">
-                <p class="stat-label">Udane zakupy</p>
+                <p class="stat-label">Zakupy: sukces</p>
                 <strong id="analyticsModeOpenCount">0</strong>
               </article>
               <article class="stat-card">
-                <p class="stat-label">Rewarded i interstitiale</p>
+                <p class="stat-label">Reklamy: rewarded/interstitial</p>
                 <strong id="analyticsUniqueModesCount">0</strong>
               </article>
             </div>
@@ -685,8 +721,8 @@
                 <table>
                   <thead>
                     <tr>
-                      <th>Event</th>
-                      <th>Parametr</th>
+                      <th>Event (co się stało)</th>
+                      <th>Parametr (wariant)</th>
                       <th>Zdarzenia</th>
                       <th>Użytkownicy</th>
                       <th>Ostatnio</th>
@@ -699,10 +735,20 @@
                   </tbody>
                 </table>
               </div>
+              <p class="table-note">Legenda: event = typ akcji, parametr = detal (np. placement reklamy, produkt, wariant paywalla).</p>
             </section>
           </section>
 
           <section id="executiveSummaryPanel" class="dashboard-panel" hidden>
+            <section class="panel-card panel-guide">
+              <p class="eyebrow">Przewodnik zakładki</p>
+              <ul class="panel-guide-list">
+                <li><strong>Co widzisz:</strong> kluczowe KPI biznesowe w jednym miejscu.</li>
+                <li><strong>Jak czytać:</strong> najpierw DAU/ARPU/crash rate, potem trend revenue i źródła przychodu.</li>
+                <li><strong>Kiedy reagować:</strong> gdy ARPU spada przy stałym DAU albo crash rate rośnie.</li>
+              </ul>
+            </section>
+
             <div class="stats-grid">
               <article class="stat-card">
                 <p class="stat-label">DAU (30 dni)</p>
@@ -775,6 +821,15 @@
           </section>
 
           <section id="adsPerformancePanel" class="dashboard-panel" hidden>
+            <section class="panel-card panel-guide">
+              <p class="eyebrow">Przewodnik zakładki</p>
+              <ul class="panel-guide-list">
+                <li><strong>Co widzisz:</strong> skuteczność placementów reklamowych.</li>
+                <li><strong>Jak czytać:</strong> impresje -> kliknięcia -> CTR -> revenue.</li>
+                <li><strong>Kiedy reagować:</strong> gdy placement ma dużo impresji, ale niski CTR i niski przychód.</li>
+              </ul>
+            </section>
+
             <div class="stats-grid">
               <article class="stat-card">
                 <p class="stat-label">Impresjones reklam</p>
@@ -846,6 +901,15 @@
           </section>
 
           <section id="engagementPanel" class="dashboard-panel" hidden>
+            <section class="panel-card panel-guide">
+              <p class="eyebrow">Przewodnik zakładki</p>
+              <ul class="panel-guide-list">
+                <li><strong>Co widzisz:</strong> aktywność użytkowników i retencję.</li>
+                <li><strong>Jak czytać:</strong> DAU/MAU, potem długość sesji, na końcu powroty i churn.</li>
+                <li><strong>Kiedy reagować:</strong> gdy spada D1/D7 lub rośnie churn po aktualizacji.</li>
+              </ul>
+            </section>
+
             <div class="stats-grid">
               <article class="stat-card">
                 <p class="stat-label">DAU</p>
@@ -932,6 +996,15 @@
           </section>
 
           <section id="multiphonePanel" class="dashboard-panel" hidden>
+            <section class="panel-card panel-guide">
+              <p class="eyebrow">Przewodnik zakładki</p>
+              <ul class="panel-guide-list">
+                <li><strong>Co widzisz:</strong> stan pokoi KW i jakość sesji multi-phone.</li>
+                <li><strong>Jak czytać:</strong> status sesji, potem kategorie cleanup, na końcu lista pokoi.</li>
+                <li><strong>Kiedy reagować:</strong> gdy rośnie liczba porzuconych pokoi albo completion rate spada.</li>
+              </ul>
+            </section>
+
             <div class="stats-grid">
               <article class="stat-card">
                 <p class="stat-label">Sesje KW (30 dni)</p>
@@ -1077,6 +1150,15 @@
           </section>
 
           <section id="individualAnswersPanel" class="dashboard-panel" hidden>
+            <section class="panel-card panel-guide">
+              <p class="eyebrow">Przewodnik zakładki</p>
+              <ul class="panel-guide-list">
+                <li><strong>Co widzisz:</strong> odpowiedzi indywidualne graczy (wizja + odpowiedź).</li>
+                <li><strong>Jak czytać:</strong> KPI jakości danych, potem filtry i lista rekordów do selekcji.</li>
+                <li><strong>Kiedy reagować:</strong> gdy rośnie udział pustych/krótkich wpisów lub duplikatów.</li>
+              </ul>
+            </section>
+
             <div class="stats-grid">
               <article class="stat-card">
                 <p class="stat-label">Wszystkie odpowiedzi</p>
@@ -1171,6 +1253,15 @@
           </section>
 
           <section id="releasesPanel" class="dashboard-panel" hidden>
+            <section class="panel-card panel-guide">
+              <p class="eyebrow">Przewodnik zakładki</p>
+              <ul class="panel-guide-list">
+                <li><strong>Co widzisz:</strong> adopcję wersji i potencjalne regresje.</li>
+                <li><strong>Jak czytać:</strong> udział top wersji, potem crash ratio i trendy w czasie.</li>
+                <li><strong>Kiedy reagować:</strong> gdy nowa wersja zwiększa crash/sesję względem poprzedniej.</li>
+              </ul>
+            </section>
+
             <div class="stats-grid">
               <article class="stat-card">
                 <p class="stat-label">Aktywne wersje (30 dni)</p>
@@ -1258,6 +1349,15 @@
           </section>
 
           <section id="qualityPanel" class="dashboard-panel" hidden>
+            <section class="panel-card panel-guide">
+              <p class="eyebrow">Przewodnik zakładki</p>
+              <ul class="panel-guide-list">
+                <li><strong>Co widzisz:</strong> stabilność techniczną i wydajność aplikacji.</li>
+                <li><strong>Jak czytać:</strong> crash rate + fatale, potem latency i users affected.</li>
+                <li><strong>Kiedy reagować:</strong> gdy opóźnienia rosną razem z crash rate po release.</li>
+              </ul>
+            </section>
+
             <div class="stats-grid">
               <article class="stat-card">
                 <p class="stat-label">Crash rate</p>

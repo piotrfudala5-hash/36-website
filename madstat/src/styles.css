@@ -220,6 +220,32 @@ code {
   display: none;
 }
 
+.panel-guide {
+  margin-bottom: 14px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.94), rgba(246,250,255,0.84)),
+    linear-gradient(120deg, rgba(93, 103, 198, 0.1), rgba(191, 232, 220, 0.12));
+}
+
+.panel-guide .eyebrow {
+  margin-bottom: 8px;
+}
+
+.panel-guide-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+  color: var(--text-soft);
+  line-height: 1.45;
+}
+
+.panel-guide-list strong {
+  color: var(--text-main);
+}
+
 .eyebrow {
   margin: 0 0 10px;
   text-transform: uppercase;
