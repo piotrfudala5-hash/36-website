@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>36stopni Admin Dashboard, Monetyzacja i Crashlytics</title>
     <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg?v=20260506-1" />
-    <link rel="stylesheet" href="./src/styles.css?v=20260525-5" />
+    <link rel="stylesheet" href="./src/styles.css?v=20260525-6" />
   </head>
   <body>
     <div class="page-shell">
@@ -1065,6 +1065,27 @@
               </article>
             </div>
 
+            <section class="panel-card">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Zarządzanie danymi</p>
+                  <h2>Selekcja odpowiedzi do dalszego rozwoju</h2>
+                </div>
+              </div>
+              <div class="mp-cleanup-controls">
+                <label class="mp-cleanup-option">
+                  <input id="iaOnlyCustomToggle" type="checkbox" checked />
+                  <span>Tylko „Dopisz chaos” (ukryj „Karta z ręki”)</span>
+                </label>
+              </div>
+              <div class="panel-toolbar">
+                <button id="iaSelectVisibleButton" type="button" class="ghost-button">Zaznacz widoczne</button>
+                <button id="iaClearSelectionButton" type="button" class="ghost-button">Wyczyść zaznaczenie</button>
+                <button id="iaDeleteSelectedButton" type="button" class="ghost-button">Usuń zaznaczone</button>
+              </div>
+              <p id="iaManageMessage" class="table-note"></p>
+            </section>
+
             <section class="panel-card table-card">
               <div class="panel-header">
                 <div>
@@ -1076,6 +1097,7 @@
                 <table>
                   <thead>
                     <tr>
+                      <th>Wybór</th>
                       <th>Data</th>
                       <th>Sesja</th>
                       <th>Runda</th>
@@ -1087,7 +1109,7 @@
                   </thead>
                   <tbody id="iaTableBody">
                     <tr>
-                      <td colspan="7" class="empty-row">Brak danych odpowiedzi indywidualnych</td>
+                      <td colspan="8" class="empty-row">Brak danych odpowiedzi indywidualnych</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1267,6 +1289,6 @@
       </main>
     </div>
 
-    <script type="module" src="./src/app.js?v=20260525-5"></script>
+    <script type="module" src="./src/app.js?v=20260525-6"></script>
   </body>
 </html>

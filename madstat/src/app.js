@@ -105,6 +105,11 @@ const iaUniquePlayers = document.getElementById('iaUniquePlayers');
 const iaUniqueSessions = document.getElementById('iaUniqueSessions');
 const iaTableBody = document.getElementById('iaTableBody');
 const iaInsights = document.getElementById('iaInsights');
+const iaOnlyCustomToggle = document.getElementById('iaOnlyCustomToggle');
+const iaSelectVisibleButton = document.getElementById('iaSelectVisibleButton');
+const iaClearSelectionButton = document.getElementById('iaClearSelectionButton');
+const iaDeleteSelectedButton = document.getElementById('iaDeleteSelectedButton');
+const iaManageMessage = document.getElementById('iaManageMessage');
 
 // Release Insights elements
 const relActiveVersions = document.getElementById('relActiveVersions');
@@ -252,6 +257,9 @@ let activeDashboard = restoreActiveDashboard();
 let crashRowsCache = [];
 let mpRoomStatsCache = null;
 let mpCleanupBusy = false;
+let iaRowsCache = [];
+let iaSelectedDocIds = new Set();
+let iaManageBusy = false;
 const MP_COMPLETED_RETENTION_MS = 2 * 60 * 60 * 1000;
 const MP_ABANDONED_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -372,6 +380,50 @@ mpDeleteSelectedButton?.addEventListener('click', async () => {
 
 mpDeleteSelectedManualButton?.addEventListener('click', async () => {
   await handleDeleteSelectedRoomCategories({ forceClientSide: true });
+});
+
+iaOnlyCustomToggle?.addEventListener('change', () => {
+  renderIndividualAnswersPanel();
+});
+
+iaSelectVisibleButton?.addEventListener('click', () => {
+  if (iaManageBusy) return;
+  const visibleRows = getVisibleIndividualAnswerRows();
+  for (const row of visibleRows) {
+    if (row.docId) iaSelectedDocIds.add(row.docId);
+  }
+  renderIndividualAnswersPanel();
+  setIndividualAnswersManageMessage(
+    `Zaznaczono ${iaSelectedDocIds.size} rekordów.`,
+    'success',
+  );
+});
+
+iaClearSelectionButton?.addEventListener('click', () => {
+  if (iaManageBusy) return;
+  iaSelectedDocIds.clear();
+  renderIndividualAnswersPanel();
+  setIndividualAnswersManageMessage('Wyczyszczono zaznaczenie.');
+});
+
+iaDeleteSelectedButton?.addEventListener('click', async () => {
+  await handleDeleteSelectedIndividualAnswers();
+});
+
+iaTableBody?.addEventListener('change', (event) => {
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement)) return;
+  if (!target.classList.contains('ia-row-select')) return;
+
+  const docId = String(target.dataset.docId || '').trim();
+  if (!docId) return;
+
+  if (target.checked) {
+    iaSelectedDocIds.add(docId);
+  } else {
+    iaSelectedDocIds.delete(docId);
+  }
+  refreshIndividualAnswersSelectionState();
 });
 
 onAuthStateChanged(auth, async (user) => {
@@ -647,14 +699,116 @@ async function loadGamesDashboard() {
 async function loadIndividualAnswersDashboard() {
   const collectionName = dashboardCollections.kwIndividualAnswers;
   const rows = collectionName ? await loadCollectionRows(collectionName) : [];
-  const normalized = rows
+  iaRowsCache = rows
     .map((row) => normalizeKwIndividualAnswerRow(row.id, row))
     .filter((row) => hasUsefulIndividualAnswerData(row))
     .sort((left, right) => getTimestampValue(right.createdAtRaw) - getTimestampValue(left.createdAtRaw));
 
-  renderIndividualAnswersStats(normalized);
-  renderIndividualAnswersTable(normalized);
-  renderIndividualAnswersInsights(normalized);
+  pruneIndividualAnswersSelection();
+  renderIndividualAnswersPanel();
+}
+
+function getVisibleIndividualAnswerRows() {
+  const onlyCustom = iaOnlyCustomToggle?.checked ?? true;
+  if (!onlyCustom) return iaRowsCache;
+  return iaRowsCache.filter((row) => row.answerType === 'custom');
+}
+
+function pruneIndividualAnswersSelection() {
+  const validIds = new Set(iaRowsCache.map((row) => row.docId).filter(Boolean));
+  iaSelectedDocIds = new Set(
+    [...iaSelectedDocIds].filter((docId) => validIds.has(docId)),
+  );
+}
+
+function setIndividualAnswersManageMessage(text, tone = 'muted') {
+  if (!iaManageMessage) return;
+  iaManageMessage.textContent = text || '';
+  iaManageMessage.classList.remove('mp-cleanup-error', 'mp-cleanup-success');
+  if (tone === 'error') iaManageMessage.classList.add('mp-cleanup-error');
+  if (tone === 'success') iaManageMessage.classList.add('mp-cleanup-success');
+}
+
+function setIndividualAnswersManageBusy(busy) {
+  iaManageBusy = busy;
+  if (iaOnlyCustomToggle) iaOnlyCustomToggle.disabled = busy;
+  if (iaSelectVisibleButton) iaSelectVisibleButton.disabled = busy;
+  if (iaClearSelectionButton) iaClearSelectionButton.disabled = busy;
+  if (iaDeleteSelectedButton) iaDeleteSelectedButton.disabled = busy;
+}
+
+function refreshIndividualAnswersSelectionState() {
+  const visibleRows = getVisibleIndividualAnswerRows();
+  const selectedVisibleCount = visibleRows.filter(
+    (row) => row.docId && iaSelectedDocIds.has(row.docId),
+  ).length;
+  const totalSelected = iaSelectedDocIds.size;
+  if (!iaManageMessage) return;
+  if (iaManageBusy) return;
+  if (totalSelected <= 0) {
+    iaManageMessage.textContent = `Widoczne rekordy: ${visibleRows.length}. Zaznaczone: 0.`;
+    iaManageMessage.classList.remove('mp-cleanup-error', 'mp-cleanup-success');
+    return;
+  }
+  iaManageMessage.textContent =
+    `Widoczne rekordy: ${visibleRows.length}. Zaznaczone (widoczne): ${selectedVisibleCount}. Łącznie zaznaczone: ${totalSelected}.`;
+  iaManageMessage.classList.remove('mp-cleanup-error', 'mp-cleanup-success');
+}
+
+function renderIndividualAnswersPanel() {
+  const visibleRows = getVisibleIndividualAnswerRows();
+  renderIndividualAnswersStats(visibleRows);
+  renderIndividualAnswersTable(visibleRows);
+  renderIndividualAnswersInsights(visibleRows);
+  refreshIndividualAnswersSelectionState();
+}
+
+async function handleDeleteSelectedIndividualAnswers() {
+  if (iaManageBusy) return;
+  const selectedDocIds = [...iaSelectedDocIds].filter(Boolean);
+  if (!selectedDocIds.length) {
+    setIndividualAnswersManageMessage(
+      'Zaznacz co najmniej jeden rekord do usunięcia.',
+      'error',
+    );
+    return;
+  }
+
+  const ok = window.confirm(
+    `Usunąć zaznaczone rekordy (${selectedDocIds.length}) z kw_individual_answers?`,
+  );
+  if (!ok) return;
+
+  try {
+    setIndividualAnswersManageBusy(true);
+    setIndividualAnswersManageMessage('Usuwanie zaznaczonych rekordów...');
+    const collectionName = dashboardCollections.kwIndividualAnswers;
+    if (!collectionName) {
+      throw new Error('Nie skonfigurowano kolekcji kw_individual_answers.');
+    }
+    for (const chunk of chunkArray(selectedDocIds, 350)) {
+      const batch = writeBatch(db);
+      for (const docId of chunk) {
+        batch.delete(doc(db, collectionName, docId));
+      }
+      await batch.commit();
+    }
+    iaSelectedDocIds.clear();
+    await loadIndividualAnswersDashboard();
+    setIndividualAnswersManageMessage(
+      `Usunięto rekordów: ${selectedDocIds.length}.`,
+      'success',
+    );
+  } catch (error) {
+    console.error('[KW_INDIVIDUAL] delete failed:', error);
+    setIndividualAnswersManageMessage(
+      `Nie udało się usunąć rekordów: ${error?.message || error}`,
+      'error',
+    );
+  } finally {
+    setIndividualAnswersManageBusy(false);
+    refreshIndividualAnswersSelectionState();
+  }
 }
 
 async function loadCrashlyticsDashboard() {
@@ -1826,19 +1980,20 @@ function individualAnswerTypeBadge(type) {
 
 function renderIndividualAnswersTable(rows) {
   if (!rows.length) {
-    iaTableBody.innerHTML = '<tr><td colspan="7" class="empty-row">Brak danych odpowiedzi indywidualnych</td></tr>';
+    iaTableBody.innerHTML = '<tr><td colspan="8" class="empty-row">Brak danych odpowiedzi indywidualnych</td></tr>';
     return;
   }
 
   iaTableBody.innerHTML = rows
     .map((row) => {
-      const session = row.sessionId || row.roomId || '—';
+      const isSelected = row.docId ? iaSelectedDocIds.has(row.docId) : false;
+      const session = row.sessionId || row.roomId || '�';
       const roundLabel = row.totalRounds > 0
         ? `${row.roundIndex + 1}/${row.totalRounds}`
         : String(row.roundIndex + 1);
-      const playerName = row.playerName || row.playerId || '—';
-      const visionValue = row.visionText || row.visionId || '—';
-      const answerValue = row.answerText || row.elementId || '—';
+      const playerName = row.playerName || row.playerId || '�';
+      const visionValue = row.visionText || row.visionId || '�';
+      const answerValue = row.answerText || row.elementId || '�';
       const answerType = renderBadge(
         individualAnswerTypeBadge(row.answerType),
         individualAnswerTypeLabel(row.answerType),
@@ -1846,6 +2001,14 @@ function renderIndividualAnswersTable(rows) {
 
       return `
         <tr>
+          <td>
+            <input
+              type="checkbox"
+              class="ia-row-select"
+              data-doc-id="${escapeHtml(String(row.docId || ''))}"
+              ${isSelected ? 'checked' : ''}
+            />
+          </td>
           <td>${escapeHtml(formatDate(row.createdAtRaw))}</td>
           <td><code>${escapeHtml(truncateText(String(session), 28))}</code></td>
           <td>${escapeHtml(roundLabel)}</td>
@@ -1861,7 +2024,6 @@ function renderIndividualAnswersTable(rows) {
     })
     .join('');
 }
-
 function renderIndividualAnswersInsights(rows) {
   if (!rows.length) {
     renderInsights(iaInsights, []);
