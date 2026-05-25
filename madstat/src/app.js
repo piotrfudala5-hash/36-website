@@ -3372,17 +3372,8 @@ function selectSummariesForDelete({ summaries, categories, now, forceOngoing = f
 
 async function loadAllRoomSummariesClientSide() {
   const summaries = [];
-  let docs = [];
-  try {
-    const onlyCurrent = await getDocs(
-      query(collectionGroup(db, 'snapshots'), where(documentId(), '==', 'current')),
-    );
-    docs = onlyCurrent.docs;
-  } catch (error) {
-    console.warn('[KW_STATS] fallback collectionGroup scan:', error);
-    const everySnapshot = await getDocs(query(collectionGroup(db, 'snapshots')));
-    docs = everySnapshot.docs.filter((docSnap) => docSnap.id === 'current');
-  }
+  const everySnapshot = await getDocs(query(collectionGroup(db, 'snapshots')));
+  const docs = everySnapshot.docs.filter((docSnap) => docSnap.id === 'current');
 
   for (const docSnap of docs) {
     if (docSnap.id !== 'current') continue;
@@ -3459,9 +3450,20 @@ async function deleteRoomCodeDocs(summary) {
 
 async function deleteRoomArtifactsClientSide(summary) {
   if (!summary?.roomId) return false;
-  await deleteSubcollectionDocs(`kw_rooms/${summary.roomId}/actions`);
-  await deleteSubcollectionDocs(`kw_rooms/${summary.roomId}/snapshots`);
-  await deleteRoomCodeDocs(summary);
+  try {
+    await deleteSubcollectionDocs(`kw_rooms/${summary.roomId}/actions`);
+  } catch (error) {
+    console.warn('[KW_STATS] skipping actions cleanup for room', summary.roomId, error);
+  }
+  try {
+    await deleteSubcollectionDocs(`kw_rooms/${summary.roomId}/snapshots`);
+  } catch (error) {
+    console.warn('[KW_STATS] skipping snapshots cleanup for room', summary.roomId, error);
+    await deleteDoc(doc(db, 'kw_rooms', summary.roomId, 'snapshots', 'current')).catch(() => {});
+  }
+  await deleteRoomCodeDocs(summary).catch((error) => {
+    console.warn('[KW_STATS] room code cleanup warning for room', summary.roomId, error);
+  });
   await deleteDoc(doc(db, 'kw_rooms', summary.roomId)).catch(() => {});
   return true;
 }
@@ -3516,7 +3518,7 @@ async function refreshMultiphoneRoomStats({ force = false } = {}) {
     } catch (fallbackError) {
       console.error('[KW_STATS] client-side stats failed:', fallbackError);
       setMultiphoneCleanupMessage(
-        'Nie udalo sie pobrac statusow pokoi.',
+        `Nie udalo sie pobrac statusow pokoi: ${fallbackError?.message || fallbackError}`,
         'error',
       );
       return null;
@@ -3590,7 +3592,7 @@ async function handleDeleteSelectedRoomCategories({ forceClientSide = false } = 
   } catch (error) {
     console.error('[KW_STATS] delete categories failed:', error);
     setMultiphoneCleanupMessage(
-      `Nie udalo sie usunac kategorii: ${error?.message || error}`,
+      `Nie udalo sie usunac kategorii: ${error?.message || error?.code || error}`,
       'error',
     );
   } finally {
